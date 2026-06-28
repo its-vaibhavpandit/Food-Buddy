@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens ───────────────────────────────────────────
+   Fast Food Buddy's warm, food-commerce identity.
+   Palette: deep charcoal base, flame orange primary,
+   warm cream backgrounds, sage green accents.
+   ─────────────────────────────────────────────────────────── */
+
+@theme inline {
+  /* Typography */
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-inter), system-ui, sans-serif;
+
+  /* Brand Colors */
+  --color-flame-50: #fff7f0;
+  --color-flame-100: #ffecdb;
+  --color-flame-200: #ffd5b0;
+  --color-flame-300: #ffb777;
+  --color-flame-400: #ff8f3c;
+  --color-flame-500: #ff6b35;
+  --color-flame-600: #e85520;
+  --color-flame-700: #c44018;
+  --color-flame-800: #9b3316;
+  --color-flame-900: #7d2c15;
+
+  --color-sage-50: #f4f7f4;
+  --color-sage-100: #e2eae2;
+  --color-sage-200: #c5d6c5;
+  --color-sage-300: #9fba9f;
+  --color-sage-400: #739973;
+  --color-sage-500: #547b54;
+  --color-sage-600: #416341;
+  --color-sage-700: #354f35;
+  --color-sage-800: #2c402c;
+  --color-sage-900: #253525;
+
+  --color-cream-50: #fffdfb;
+  --color-cream-100: #fff8f0;
+  --color-cream-200: #fff0dd;
+  --color-cream-300: #ffe4c4;
+
+  /* Semantic aliases */
+  --color-background: var(--color-cream-50);
+  --color-foreground: #1a1a1a;
+  --color-muted: #f5f1ec;
+  --color-muted-foreground: #6b6560;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1a1a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1a1a1a;
+  --color-primary: var(--color-flame-500);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-cream-200);
+  --color-secondary-foreground: #1a1a1a;
+  --color-accent: var(--color-sage-500);
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e8e2db;
+  --color-input: #e8e2db;
+  --color-ring: var(--color-flame-500);
+
+  /* Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+}
+
+/* ─── Base Layer ──────────────────────────────────────────── */
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cream-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-flame-300);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-flame-400);
+}
+
+/* Focus ring for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-flame-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Selection highlight */
+::selection {
+  background-color: var(--color-flame-200);
+  color: var(--color-foreground);
+}
+
+/* ─── Utility Classes ─────────────────────────────────────── */
+
+/* Gradient overlays for hero sections */
+.gradient-hero {
+  background: linear-gradient(
+    135deg,
+    var(--color-cream-50) 0%,
+    var(--color-cream-200) 50%,
+    var(--color-flame-50) 100%
+  );
+}
+
+.gradient-hero-dark {
+  background: linear-gradient(
+    135deg,
+    #1a1a1a 0%,
+    #2d1f15 50%,
+    #3d2215 100%
+  );
+}
+
+/* Glass effect for navbar */
+.glass {
+  background: rgba(255, 253, 251, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Veg/non-veg indicator dot */
+.veg-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #22c55e;
+  border-radius: 2px;
+}
+
+.veg-badge::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #22c55e;
+}
+
+.nonveg-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #dc2626;
+  border-radius: 2px;
+}
+
+.nonveg-badge::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #dc2626;
+}
+
+/* Shimmer animation for loading states */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+/* Subtle float animation for hero elements */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}

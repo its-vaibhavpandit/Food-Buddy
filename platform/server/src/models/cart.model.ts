@@ -1,0 +1,15 @@
+import { Schema, model } from 'mongoose';
+
+const cartItemSchema = new Schema({
+  menuItem: { type: Schema.Types.ObjectId, ref: 'MenuItem', required: true },
+  quantity: { type: Number, required: true, min: 1 }
+}, { _id: false });
+
+const cartSchema = new Schema({
+  user: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true, index: true },
+  items: [cartItemSchema]
+}, {
+  timestamps: true
+});
+
+export const Cart = model('Cart', cartSchema);
