@@ -51,7 +51,7 @@ api.interceptors.response.use(
         setAccessToken(null);
         // Only redirect if we're in the browser
         if (typeof window !== "undefined") {
-          window.location.href = "/login";
+          window.dispatchEvent(new Event("auth:unauthorized"));
         }
         return Promise.reject(error);
       }

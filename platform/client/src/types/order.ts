@@ -33,7 +33,8 @@ export interface Order {
   total: number;
   status: OrderStatus;
   deliveryAddress: OrderAddress;
-  paymentMethod: "cod" | "online";
+  paymentMethod: "cod" | "online" | "upi";
+  upiTransactionId?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -41,6 +42,7 @@ export interface Order {
 
 export interface CreateOrderPayload {
   deliveryAddress: OrderAddress;
-  paymentMethod: "cod" | "online";
+  paymentMethod: "cod" | "online" | "upi";
+  upiTransactionId?: string;
   notes?: string;
 }

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { User, Sms, Call, ShieldSecurity, Routing, LogoutCurve, Setting2 } from "iconsax-react";
 import { useAuth } from "@/providers/auth-provider";
@@ -46,8 +47,15 @@ export default function ProfilePage() {
           {/* Left Sidebar Account Navigation */}
           <div className="md:col-span-1 space-y-6">
             <Card className="p-6 border-border/50 bg-white rounded-2xl shadow-sm text-center">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-flame-500 text-white text-3xl font-extrabold shadow-lg shadow-flame-500/10 mb-4">
-                {user.name.charAt(0).toUpperCase()}
+              <div className="relative mx-auto h-20 w-20 overflow-hidden rounded-full border-4 border-flame-100 shadow-md mb-4 bg-flame-50/50">
+                <Image
+                  src="/images/avatar.svg"
+                  alt={user.name}
+                  fill
+                  className="object-cover"
+                  sizes="80px"
+                  priority
+                />
               </div>
               <h2 className="text-lg font-bold text-foreground font-[family-name:var(--font-display)]">
                 {user.name}
@@ -158,11 +166,11 @@ export default function ProfilePage() {
 
               {user.addresses && user.addresses.length > 0 ? (
                 <div className="space-y-4 text-xs">
-                  {user.addresses.map((address) => (
+                  {user.addresses.map((address, index) => (
                     <div key={address._id} className="p-4 border border-border/60 rounded-xl flex justify-between items-start gap-4 hover:bg-cream-50/10">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-foreground">{address.label}</span>
+                          <span className="font-bold text-foreground">Address {index + 1}</span>
                           {address.isDefault && (
                             <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-50 text-[9px] px-1.5 py-0.5">
                               Default
@@ -170,7 +178,7 @@ export default function ProfilePage() {
                           )}
                         </div>
                         <p className="text-muted-foreground mt-1 text-[11px] leading-relaxed">
-                          {address.street}, {address.city}, {address.state} - {address.pincode}
+                          {address.street}, {address.city}, {address.state} - {address.zipCode}
                         </p>
                       </div>
                     </div>

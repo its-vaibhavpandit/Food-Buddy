@@ -27,11 +27,14 @@ const orderSchema = new Schema({
     default: 'pending'
   },
   deliveryAddress: { type: orderAddressSchema, required: true },
-  paymentMethod: { type: String, enum: ['cod', 'online'], default: 'cod' },
+  paymentMethod: { type: String, enum: ['cod', 'online', 'upi'], default: 'cod' },
   paymentStatus: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
+  upiTransactionId: { type: String, trim: true },
   notes: { type: String }
 }, {
   timestamps: true
 });
+
+orderSchema.index({ user: 1, createdAt: -1 });
 
 export const Order = model('Order', orderSchema);

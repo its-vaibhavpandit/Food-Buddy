@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Definitions for Gradients -->
+  <defs>
+    <linearGradient id="hoodieGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF8A5C" />
+      <stop offset="100%" stop-color="#FF6B35" />
+    </linearGradient>
+    <linearGradient id="skinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFDFC2" />
+      <stop offset="100%" stop-color="#FCD0A1" />
+    </linearGradient>
+    <linearGradient id="hairGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D3748" />
+      <stop offset="100%" stop-color="#1A202C" />
+    </linearGradient>
+    <linearGradient id="bunGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#D69E2E" />
+      <stop offset="100%" stop-color="#B7791F" />
+    </linearGradient>
+    <clipPath id="avatarClip">
+      <circle cx="50" cy="50" r="48" />
+    </clipPath>
+  </defs>
+
+  <!-- Background Circle (Matching brand palette) -->
+  <circle cx="50" cy="50" r="48" fill="#FFF8F5" stroke="#FFE6DC" stroke-width="2" />
+
+  <g clip-path="url(#avatarClip)">
+    <!-- Hoodie Shoulders -->
+    <path d="M15 82C15 72 25 65 38 65H62C75 65 85 72 85 82V100H15V82Z" fill="url(#hoodieGrad)" />
+    <!-- Hoodie Strings -->
+    <path d="M45 66V76" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+    <path d="M55 66V76" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+
+    <!-- Neck -->
+    <rect x="44" y="55" width="12" height="12" rx="3" fill="#FCD0A1" />
+
+    <!-- Head / Face -->
+    <circle cx="50" cy="40" r="18" fill="url(#skinGrad)" />
+
+    <!-- Hair (Trendy modern crop) -->
+    <path d="M31 35C31 22 40 20 50 20C60 20 69 22 69 35C69 35 65 24 50 24C35 24 31 35 31 35Z" fill="url(#hairGrad)" />
+    <!-- Side hair crop -->
+    <path d="M32 35V42L36 38Z" fill="#1A202C" />
+    <path d="M68 35V42L64 38Z" fill="#1A202C" />
+
+    <!-- Cute Smiling Eyes -->
+    <path d="M41 38C42.5 36.5 45.5 36.5 47 38" stroke="#1A202C" stroke-width="2.2" stroke-linecap="round" />
+    <path d="M53 38C54.5 36.5 57.5 36.5 59 38" stroke="#1A202C" stroke-width="2.2" stroke-linecap="round" />
+
+    <!-- Happy Blushing cheeks -->
+    <circle cx="37" cy="43" r="2.5" fill="#FF8A8A" opacity="0.6" />
+    <circle cx="63" cy="43" r="2.5" fill="#FF8A8A" opacity="0.6" />
+
+    <!-- Friendly Smile -->
+    <path d="M45 44.5C47 47 53 47 55 44.5" stroke="#1A202C" stroke-width="2.2" stroke-linecap="round" />
+
+    <!-- Gourmet Burger in Hand (bottom-left area of profile) -->
+    <g transform="translate(14, 60) scale(0.65)">
+      <!-- Bottom Bun -->
+      <path d="M5 28C5 25 15 25 25 25C35 25 45 25 45 28C45 32 5 32 5 28Z" fill="#B7791F" />
+      <!-- Meat Patty -->
+      <rect x="3" y="21" width="44" height="5" rx="2" fill="#7B341E" />
+      <!-- Melted Cheese -->
+      <path d="M2 18H48L44 23L38 18L30 23L22 18L14 23L6 18Z" fill="#ECC94B" />
+      <!-- Tomato/Lettuce -->
+      <rect x="4" y="15" width="42" height="3" rx="1" fill="#48BB78" />
+      <!-- Top Bun -->
+      <path d="M5 14C5 6 15 3 25 3C35 3 45 6 45 14H5Z" fill="url(#bunGrad)" />
+      <!-- Sesame seeds -->
+      <ellipse cx="18" cy="7" rx="1" ry="0.5" fill="#FFFFFF" />
+      <ellipse cx="25" cy="9" rx="1" ry="0.5" fill="#FFFFFF" />
+      <ellipse cx="32" cy="7" rx="1" ry="0.5" fill="#FFFFFF" />
+    </g>
+
+    <!-- Soda Drink Cup in Hand (bottom-right area of profile) -->
+    <g transform="translate(68, 58) scale(0.7)">
+      <!-- Cup Body -->
+      <path d="M5 10L10 32C10 33 11 34 12 34H24C25 34 26 33 26 32L31 10H5Z" fill="#FF8A5C" />
+      <!-- Brand Stripe -->
+      <rect x="6.5" y="16" width="23" height="6" fill="#FFFFFF" />
+      <circle cx="18" cy="19" r="2.5" fill="#FF6B35" />
+      <!-- Cup Lid -->
+      <rect x="3" y="7" width="30" height="3" rx="1" fill="#E2E8F0" />
+      <!-- Straw -->
+      <path d="M18 7V1L24 3" stroke="#4A5568" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+  </g>
+</svg>

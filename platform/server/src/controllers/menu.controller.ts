@@ -1,67 +1,58 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { MenuItem } from '../models/menu-item.model.js';
 import { Category } from '../models/category.model.js';
 import { AppError } from '../middleware/error.js';
+import { catchAsync } from '../middleware/async-handler.js';
 
-export const getMenuItems = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { category, search } = req.query;
+/** Escape regex special characters to prevent ReDoS */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
-    const query: any = { isAvailable: true };
+export const getMenuItems = catchAsync(async (req: Request, res: Response) => {
+  const { category, search } = req.query;
 
-    if (category) {
-      const foundCategory = await Category.findOne({ slug: category });
-      if (foundCategory) {
-        query.category = foundCategory._id;
-      } else {
-        // If category is invalid, we return empty list
-        res.status(200).json({ status: 'success', data: { menuItems: [] } });
-        return;
-      }
+  const query: Record<string, unknown> = { isAvailable: true };
+
+  if (category) {
+    const foundCategory = await Category.findOne({ slug: category }).lean();
+    if (foundCategory) {
+      query.category = foundCategory._id;
+    } else {
+      res.status(200).json({ status: 'success', data: { menuItems: [] } });
+      return;
     }
-
-    if (search) {
-      query.name = { $regex: search, $options: 'i' };
-    }
-
-    const menuItems = await MenuItem.find(query).populate('category');
-
-    res.status(200).json({
-      status: 'success',
-      data: { menuItems }
-    });
-  } catch (error) {
-    next(error);
   }
-};
 
-export const getMenuItemBySlug = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { slug } = req.params;
-    const menuItem = await MenuItem.findOne({ slug, isAvailable: true }).populate('category');
-
-    if (!menuItem) {
-      throw new AppError('Menu item not found', 404);
-    }
-
-    res.status(200).json({
-      status: 'success',
-      data: { menuItem }
-    });
-  } catch (error) {
-    next(error);
+  if (search && typeof search === 'string' && search.trim()) {
+    query.name = { $regex: escapeRegex(search.trim()), $options: 'i' };
   }
-};
 
-export const getCategories = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const categories = await Category.find({ isActive: true }).sort('sortOrder');
+  const menuItems = await MenuItem.find(query).populate('category').lean();
 
-    res.status(200).json({
-      status: 'success',
-      data: { categories }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+  res.status(200).json({
+    status: 'success',
+    data: { menuItems },
+  });
+});
+
+export const getMenuItemBySlug = catchAsync(async (req: Request, res: Response) => {
+  const { slug } = req.params;
+  const menuItem = await MenuItem.findOne({ slug, isAvailable: true }).populate('category').lean();
+
+  if (!menuItem) throw new AppError('Menu item not found', 404);
+
+  res.status(200).json({
+    status: 'success',
+    data: { menuItem },
+  });
+});
+
+export const getCategories = catchAsync(async (_req: Request, res: Response) => {
+  const categories = await Category.find({ isActive: true }).sort('sortOrder').lean();
+
+  res.status(200).json({
+    status: 'success',
+    data: { categories },
+  });
+});

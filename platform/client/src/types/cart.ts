@@ -14,7 +14,7 @@ export interface Cart {
 }
 
 export interface AddToCartPayload {
-  menuItemId: string;
+  menuItem: string;
   quantity: number;
 }
 

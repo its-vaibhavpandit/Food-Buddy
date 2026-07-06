@@ -13,10 +13,10 @@ const userSchema = new Schema({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
   phone: { type: String, trim: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true, select: false },
   role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
   addresses: [addressSchema],
-  refreshTokens: [{ type: String }]
+  refreshTokens: { type: [{ type: String }], select: false }
 }, {
   timestamps: true
 });

@@ -1,11 +1,11 @@
-import { Router } from 'express';
-import { 
-  getDashboardStats, 
-  adminGetOrders, 
-  adminUpdateOrder, 
-  adminGetUsers, 
-  adminCreateMenuItem, 
-  adminUpdateMenuItem, 
+import { Router, type RequestHandler } from 'express';
+import {
+  getDashboardStats,
+  adminGetOrders,
+  adminUpdateOrderStatus,
+  adminGetUsers,
+  adminCreateMenuItem,
+  adminUpdateMenuItem,
   adminDeleteMenuItem,
   adminCreateCategory,
   adminUpdateCategory,
@@ -19,30 +19,31 @@ import { updateOrderStatusSchema } from '../validators/order.validators.js';
 
 const router = Router();
 
-// Protect all admin routes
-router.use(authenticate as any, authorizeAdmin as any);
+const auth = authenticate as unknown as RequestHandler;
+const admin = authorizeAdmin as unknown as RequestHandler;
+router.use(auth, admin);
 
-router.get('/stats', getDashboardStats as any);
-router.get('/users', adminGetUsers as any);
+router.get('/stats', getDashboardStats as unknown as RequestHandler);
+router.get('/users', adminGetUsers as unknown as RequestHandler);
 
 router.route('/orders')
-  .get(adminGetOrders as any);
+  .get(adminGetOrders as unknown as RequestHandler);
 
 router.route('/orders/:id')
-  .patch(validate(updateOrderStatusSchema), adminUpdateOrder as any);
+  .patch(validate(updateOrderStatusSchema), adminUpdateOrderStatus as unknown as RequestHandler);
 
 router.route('/menu')
-  .post(validate(createMenuItemSchema), adminCreateMenuItem as any);
+  .post(validate(createMenuItemSchema), adminCreateMenuItem as unknown as RequestHandler);
 
 router.route('/menu/:id')
-  .patch(validate(updateMenuItemSchema), adminUpdateMenuItem as any)
-  .delete(adminDeleteMenuItem as any);
+  .patch(validate(updateMenuItemSchema), adminUpdateMenuItem as unknown as RequestHandler)
+  .delete(adminDeleteMenuItem as unknown as RequestHandler);
 
 router.route('/categories')
-  .post(validate(createCategorySchema), adminCreateCategory as any);
+  .post(validate(createCategorySchema), adminCreateCategory as unknown as RequestHandler);
 
 router.route('/categories/:id')
-  .patch(adminUpdateCategory as any)
-  .delete(adminDeleteCategory as any);
+  .patch(adminUpdateCategory as unknown as RequestHandler)
+  .delete(adminDeleteCategory as unknown as RequestHandler);
 
 export default router;

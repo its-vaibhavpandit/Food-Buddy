@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { motion } from "framer-motion";
 import { SearchNormal1, FilterSearch, ArrowRight } from "iconsax-react";
 import { useMenuItems, useCategories } from "@/hooks/use-menu";
 import { MenuCard } from "@/components/menu/menu-card";
@@ -17,16 +18,24 @@ function MenuContent() {
 
   const [category, setCategory] = useState<string>(initialCategory);
   const [search, setSearch] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [vegOnly, setVegOnly] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>("default");
+  const [activeCity, setActiveCity] = useState("Varanasi");
+  
+  useEffect(() => {
+    setActiveCity(localStorage.getItem("selectedCity") || "Varanasi");
+  }, []);
 
-  // Get active city from localStorage or local selected setting (simulating global state)
-  const activeCity = typeof window !== "undefined" ? localStorage.getItem("selectedCity") || "Varanasi" : "Varanasi";
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const { data: categories, isLoading: categoriesLoading } = useCategories();
   const { data: menuItems, isLoading: itemsLoading } = useMenuItems({
     category: category || undefined,
-    search: search || undefined,
+    search: debouncedSearch || undefined,
   });
 
   const handleCategorySelect = (slug: string) => {
@@ -178,15 +187,33 @@ function MenuContent() {
             ))}
           </div>
         ) : filteredAndSortedItems.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <motion.div 
+            variants={{
+              hidden: { opacity: 0 },
+              show: {
+                opacity: 1,
+                transition: { staggerChildren: 0.1 }
+              }
+            }}
+            initial="hidden"
+            animate="show"
+            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          >
             {filteredAndSortedItems.map((item) => (
-              <MenuCard
+              <motion.div 
                 key={item._id}
-                item={item}
-                selectedCity={activeCity}
-              />
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+                }}
+              >
+                <MenuCard
+                  item={item}
+                  selectedCity={activeCity}
+                />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         ) : (
           <EmptyState
             title="No items found"

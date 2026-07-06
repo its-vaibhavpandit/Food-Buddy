@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Outer Glow / Soft Shadow -->
+  <defs>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF8A5C" />
+      <stop offset="100%" stop-color="#FF6B35" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#FF6B35" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Abstract Speed Loop ("F" + Buddy Handshake Curve) -->
+  <g filter="url(#shadow)">
+    <!-- Speed Lines (Charcoal) -->
+    <path d="M15 35H35C37.2091 35 39 36.7909 39 39C39 41.2091 37.2091 43 35 43H20" stroke="#111827" stroke-width="6" stroke-linecap="round" />
+    <path d="M10 52H28C30.2091 52 32 53.7909 32 56C32 58.2091 30.2091 60 28 60H15" stroke="#111827" stroke-width="6" stroke-linecap="round" />
+    
+    <!-- Main Orange Loop (Combining Speed and Friend Loop) -->
+    <path d="M45 25C33.9543 25 25 33.9543 25 45C25 56.0457 33.9543 65 45 65C56.0457 65 65 56.0457 65 45C65 37 60 30 52 27" stroke="url(#orangeGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <!-- Delivery Rocket Arrow/Swoosh -->
+    <path d="M50 15L68 25L50 35L54 25L50 15Z" fill="#FF6B35" />
+    
+    <!-- Heart warming smile curve inside (signifies delicious food & buddy) -->
+    <path d="M38 48C40.5 52 49.5 52 52 48" stroke="#111827" stroke-width="4" stroke-linecap="round" />
+  </g>
+</svg>

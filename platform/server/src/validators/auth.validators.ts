@@ -2,33 +2,20 @@ import { z } from 'zod';
 
 export const registerSchema = z.object({
   body: z.object({
-    name: z.string().min(2, 'Name must be at least 2 characters'),
-    email: z.string().email('Invalid email address'),
-    phone: z.string().min(10, 'Phone must be at least 10 digits').optional().or(z.literal('')),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-  })
+    name: z.string().min(2, 'Name must be at least 2 characters').trim(),
+    email: z.string().email('Invalid email address').trim().toLowerCase(),
+    phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit Indian mobile number'),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
+      .regex(/[0-9]/, 'Must contain at least one number'),
+  }),
 });
 
 export const loginSchema = z.object({
   body: z.object({
-    email: z.string().email('Invalid email address'),
+    email: z.string().email('Invalid email address').trim().toLowerCase(),
     password: z.string().min(1, 'Password is required'),
-  })
-});
-
-export const updateProfileSchema = z.object({
-  body: z.object({
-    name: z.string().min(2, 'Name must be at least 2 characters').optional(),
-    phone: z.string().min(10, 'Phone must be at least 10 digits').optional(),
-  })
-});
-
-export const addressSchema = z.object({
-  body: z.object({
-    street: z.string().min(1, 'Street is required'),
-    city: z.string().min(1, 'City is required'),
-    state: z.string().min(1, 'State is required'),
-    zipCode: z.string().min(5, 'Zip code is required'),
-    isDefault: z.boolean().optional(),
-  })
+  }),
 });

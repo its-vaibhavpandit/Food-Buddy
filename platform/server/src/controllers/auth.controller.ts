@@ -1,8 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user.model.js';
 import { env } from '../config/env.js';
 import { AppError } from '../middleware/error.js';
+import { catchAsync } from '../middleware/async-handler.js';
 import { AuthRequest } from '../middleware/auth.js';
 
 const generateTokens = (id: string, role: string) => {
@@ -11,241 +12,219 @@ const generateTokens = (id: string, role: string) => {
   return { accessToken, refreshToken };
 };
 
-const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
-  const { accessToken, refreshToken } = generateTokens(user._id.toString(), user.role);
-
-  // Set refresh token in HttpOnly cookie
+const setRefreshCookie = (res: Response, refreshToken: string) => {
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
+};
+
+const clearRefreshCookie = (res: Response) => {
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  });
+};
+
+const formatUserResponse = (user: any) => ({
+  id: user._id,
+  name: user.name,
+  email: user.email,
+  phone: user.phone,
+  role: user.role,
+  addresses: user.addresses,
+});
+
+const sendTokenResponse = async (user: any, statusCode: number, res: Response) => {
+  const { accessToken, refreshToken } = generateTokens(user._id.toString(), user.role);
+
+  // Cap at 5 active sessions
+  if (user.refreshTokens.length >= 5) {
+    user.refreshTokens.shift();
+  }
+  user.refreshTokens.push(refreshToken);
+  await user.save({ validateModifiedOnly: true });
+
+  setRefreshCookie(res, refreshToken);
 
   res.status(statusCode).json({
     status: 'success',
     data: {
       accessToken,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        addresses: user.addresses
-      }
-    }
+      user: formatUserResponse(user),
+    },
   });
 };
 
-export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { name, email, phone, password } = req.body;
+export const register = catchAsync(async (req: Request, res: Response) => {
+  const { name, email, phone, password } = req.body;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new AppError('Email already registered', 400);
-    }
-
-    const user = await User.create({
-      name,
-      email,
-      phone,
-      password,
-    });
-
-    sendTokenResponse(user, 201, res);
-  } catch (error) {
-    next(error);
+  const existingUser = await User.findOne({ email }).lean();
+  if (existingUser) {
+    throw new AppError('Email already registered', 400);
   }
-};
 
-export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { email, password } = req.body;
+  const user = await User.create({ name, email, phone, password });
+  // Freshly created user needs refreshTokens array initialized
+  user.refreshTokens = user.refreshTokens || [];
 
-    const user = await User.findOne({ email });
-    if (!user || !(await (user as any).comparePassword(password))) {
-      throw new AppError('Invalid email or password', 401);
-    }
+  await sendTokenResponse(user, 201, res);
+});
 
-    sendTokenResponse(user, 200, res);
-  } catch (error) {
-    next(error);
+export const login = catchAsync(async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  // Explicitly select password and refreshTokens since they have select:false
+  const user = await User.findOne({ email }).select('+password +refreshTokens');
+  if (!user || !(await (user as any).comparePassword(password))) {
+    throw new AppError('Invalid email or password', 401);
   }
-};
 
-export const logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    // Clear cookies
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: 'lax'
-    });
+  await sendTokenResponse(user, 200, res);
+});
 
-    res.status(200).json({
-      status: 'success',
-      message: 'Logged out successfully'
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const refresh = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) {
-      throw new AppError('Refresh token missing', 401);
-    }
-
-    let decoded: any;
+export const logout = catchAsync(async (req: Request, res: Response) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (refreshToken) {
     try {
-      decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET);
-    } catch (err) {
-      throw new AppError('Invalid refresh token', 401);
-    }
-
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      throw new AppError('User no longer exists', 401);
-    }
-
-    sendTokenResponse(user, 200, res);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getMe = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    if (!req.user) {
-      throw new AppError('Not authenticated', 401);
-    }
-
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) {
-      throw new AppError('User not found', 404);
-    }
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          role: user.role,
-          addresses: user.addresses
-        }
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const updateProfile = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    if (!req.user) {
-      throw new AppError('Not authenticated', 401);
-    }
-
-    const { name, phone } = req.body;
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { $set: { ...(name && { name }), ...(phone && { phone }) } },
-      { new: true, runValidators: true }
-    ).select('-password');
-
-    res.status(200).json({
-      status: 'success',
-      data: { user }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const addAddress = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    if (!req.user) {
-      throw new AppError('Not authenticated', 401);
-    }
-
-    const { street, city, state, zipCode, isDefault } = req.body;
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      throw new AppError('User not found', 404);
-    }
-
-    // If isDefault is true, set all other addresses to false
-    if (isDefault) {
-      user.addresses.forEach((addr: any) => {
-        addr.isDefault = false;
+      const decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as { id: string };
+      await User.findByIdAndUpdate(decoded.id, {
+        $pull: { refreshTokens: refreshToken },
       });
+    } catch {
+      // Ignore token verify errors during logout
     }
-
-    // If it's the first address, make it default automatically
-    const isFirstAddress = user.addresses.length === 0;
-
-    user.addresses.push({
-      street,
-      city,
-      state,
-      zipCode,
-      isDefault: isDefault || isFirstAddress
-    });
-
-    await user.save();
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        addresses: user.addresses
-      }
-    });
-  } catch (error) {
-    next(error);
   }
-};
 
-export const deleteAddress = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  clearRefreshCookie(res);
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Logged out successfully',
+  });
+});
+
+export const refresh = catchAsync(async (req: Request, res: Response) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    throw new AppError('Refresh token missing', 401);
+  }
+
+  let decoded: { id: string; role: string };
   try {
-    if (!req.user) {
-      throw new AppError('Not authenticated', 401);
-    }
-
-    const { addressId } = req.params;
-    const user = await User.findById(req.user.id);
-    if (!user) {
-      throw new AppError('User not found', 404);
-    }
-
-    const initialLength = user.addresses.length;
-    user.addresses = user.addresses.filter((addr: any) => addr._id.toString() !== addressId) as any;
-
-    if (user.addresses.length === initialLength) {
-      throw new AppError('Address not found', 404);
-    }
-
-    // If we deleted the default address, and we still have other addresses, make the first one default
-    const hasDefault = user.addresses.some((addr: any) => addr.isDefault);
-    if (!hasDefault && user.addresses.length > 0) {
-      (user.addresses[0] as any).isDefault = true;
-    }
-
-    await user.save();
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        addresses: user.addresses
-      }
-    });
-  } catch (error) {
-    next(error);
+    decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as { id: string; role: string };
+  } catch {
+    throw new AppError('Invalid refresh token', 401);
   }
-};
+
+  const user = await User.findById(decoded.id).select('+refreshTokens');
+  if (!user) {
+    throw new AppError('User no longer exists', 401);
+  }
+
+  // Refresh token rotation / reuse detection
+  const tokenIndex = user.refreshTokens.indexOf(refreshToken);
+  if (tokenIndex === -1) {
+    // Detected reuse — revoke all sessions
+    user.refreshTokens = [];
+    await user.save({ validateModifiedOnly: true });
+    clearRefreshCookie(res);
+    throw new AppError('Detected reuse of refresh token. All sessions revoked.', 401);
+  }
+
+  // Remove the used refresh token
+  user.refreshTokens.splice(tokenIndex, 1);
+
+  await sendTokenResponse(user, 200, res);
+});
+
+export const getMe = catchAsync(async (req: AuthRequest, res: Response) => {
+  const user = await User.findById(req.user!.id).lean();
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: { user: formatUserResponse(user) },
+  });
+});
+
+export const updateProfile = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { name, phone } = req.body;
+  const user = await User.findByIdAndUpdate(
+    req.user!.id,
+    { $set: { ...(name && { name }), ...(phone && { phone }) } },
+    { new: true, runValidators: true }
+  ).lean();
+
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: { user: formatUserResponse(user) },
+  });
+});
+
+export const addAddress = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { street, city, state, zipCode, isDefault } = req.body;
+  const user = await User.findById(req.user!.id);
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  // If isDefault is true, unset all other defaults
+  if (isDefault) {
+    user.addresses.forEach((addr: any) => { addr.isDefault = false; });
+  }
+
+  const isFirstAddress = user.addresses.length === 0;
+
+  user.addresses.push({
+    street,
+    city,
+    state,
+    zipCode,
+    isDefault: isDefault || isFirstAddress,
+  });
+
+  await user.save({ validateModifiedOnly: true });
+
+  res.status(200).json({
+    status: 'success',
+    data: { addresses: user.addresses },
+  });
+});
+
+export const deleteAddress = catchAsync(async (req: AuthRequest, res: Response) => {
+  const { addressId } = req.params;
+  const user = await User.findById(req.user!.id);
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  const initialLength = user.addresses.length;
+  user.addresses = user.addresses.filter((addr: any) => addr._id.toString() !== addressId) as any;
+
+  if (user.addresses.length === initialLength) {
+    throw new AppError('Address not found', 404);
+  }
+
+  // If deleted address was default, promote first remaining
+  const hasDefault = user.addresses.some((addr: any) => addr.isDefault);
+  if (!hasDefault && user.addresses.length > 0) {
+    (user.addresses[0] as any).isDefault = true;
+  }
+
+  await user.save({ validateModifiedOnly: true });
+
+  res.status(200).json({
+    status: 'success',
+    data: { addresses: user.addresses },
+  });
+});

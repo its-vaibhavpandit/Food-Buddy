@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/shared/page-header";
 import { formatPrice } from "@/lib/utils";
+import { LocationPicker } from "@/components/checkout/location-picker";
+import { UpiPayment } from "@/components/checkout/upi-payment";
 
 // Local schema for validation matching the server requirement
 const checkoutSchema = z.object({
@@ -24,7 +26,7 @@ const checkoutSchema = z.object({
   city: z.string().min(2, "City is required"),
   state: z.string().min(2, "State is required"),
   zipCode: z.string().regex(/^\d{5,6}$/, "Enter a valid 5 or 6 digit ZIP/PIN code"),
-  paymentMethod: z.enum(["cod", "online"]),
+  paymentMethod: z.enum(["cod", "online", "upi"]),
   notes: z.string().optional(),
 });
 
@@ -36,14 +38,15 @@ export default function CheckoutPage() {
   const { data: cart, isLoading: cartLoading } = useCart(isAuthenticated);
   const createOrderMutation = useCreateOrder();
 
-  const [gpsLoading, setGpsLoading] = useState(false);
-  const [gpsError, setGpsError] = useState<string | null>(null);
-  
-  // Simulated Payment Modal state
+  // Simulated Card Payment Modal state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState<boolean | null>(null);
   const [paymentFormData, setPaymentFormData] = useState<CheckoutFormData | null>(null);
+
+  // UPI Payment states
+  const [showUpiModal, setShowUpiModal] = useState(false);
+  const [upiConfirmLoading, setUpiConfirmLoading] = useState(false);
 
   // Card details mock form
   const [cardNumber, setCardNumber] = useState("");
@@ -77,69 +80,25 @@ export default function CheckoutPage() {
     }
   }, [isAuthenticated, cartLoading, router]);
 
-  // Handle GPS location fetching
-  const handleGPSLocation = () => {
-    if (!navigator.geolocation) {
-      setGpsError("Geolocation is not supported by your browser.");
-      return;
-    }
-
-    setGpsLoading(true);
-    setGpsError(null);
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        try {
-          // OpenStreetMap Nominatim Free Reverse Geocoding API
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
-          );
-          const data = await response.json();
-
-          if (data && data.address) {
-            const address = data.address;
-            
-            // Extract details
-            const road = address.road || address.suburb || address.neighbourhood || "";
-            const house = address.house_number ? `${address.house_number}, ` : "";
-            const streetAddress = `${house}${road}`.trim();
-            const city = address.city || address.town || address.village || address.county || "";
-            const state = address.state || "";
-            const postcode = address.postcode || "";
-
-            setValue("street", streetAddress || "GPS Location");
-            setValue("city", city);
-            setValue("state", state);
-            if (postcode) {
-              setValue("zipCode", postcode.replace(/\s/g, ""));
-            }
-          } else {
-            setGpsError("Failed to parse address from GPS coordinates.");
-          }
-        } catch {
-          setGpsError("Failed to connect to location services.");
-        } finally {
-          setGpsLoading(false);
-        }
-      },
-      (error) => {
-        let msg = "Could not fetch GPS coordinates.";
-        if (error.code === error.PERMISSION_DENIED) {
-          msg = "Location permission denied. Please allow access in browser settings.";
-        }
-        setGpsError(msg);
-        setGpsLoading(false);
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+  // Handle Location selection from map
+  const handleLocationPicked = (address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  }) => {
+    setValue("street", address.street);
+    setValue("city", address.city);
+    setValue("state", address.state);
+    setValue("zipCode", address.zipCode);
   };
 
   const handlePlaceOrderSubmit = async (data: CheckoutFormData) => {
+    setPaymentFormData(data);
     if (data.paymentMethod === "online") {
-      // Open simulated payment gateway modal
-      setPaymentFormData(data);
       setShowPaymentModal(true);
+    } else if (data.paymentMethod === "upi") {
+      setShowUpiModal(true);
     } else {
       // Cash on Delivery
       try {
@@ -155,20 +114,20 @@ export default function CheckoutPage() {
         });
         router.push(`/orders/${order._id}?status=created`);
       } catch (err) {
-        console.error(err);
+        // Handle error implicitly
       }
     }
   };
 
-  const handleSimulatedPayment = async () => {
+  const handleSimulatedCardPayment = async () => {
     if (!paymentFormData) return;
     setPaymentLoading(true);
     setPaymentSuccess(null);
 
-    // Simulate payment authorization delay
+    // Simulate card payment delay
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // Simple mockup validation
+    // Basic mock validation
     if (cardNumber.replace(/\s/g, "").length < 16 || cardExpiry.length < 5 || cardCvv.length < 3) {
       setPaymentSuccess(false);
       setPaymentLoading(false);
@@ -178,7 +137,6 @@ export default function CheckoutPage() {
     setPaymentSuccess(true);
     setPaymentLoading(false);
 
-    // Short delay to show the green checkmark before creating the order
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
     try {
@@ -195,15 +153,38 @@ export default function CheckoutPage() {
       setShowPaymentModal(false);
       router.push(`/orders/${order._id}?status=paid`);
     } catch (err) {
-      console.error(err);
       setPaymentSuccess(false);
+    }
+  };
+
+  const handleUpiPaymentConfirm = async (transactionId: string) => {
+    if (!paymentFormData) return;
+    setUpiConfirmLoading(true);
+    try {
+      const order = await createOrderMutation.mutateAsync({
+        deliveryAddress: {
+          street: paymentFormData.street,
+          city: paymentFormData.city,
+          state: paymentFormData.state,
+          zipCode: paymentFormData.zipCode,
+        },
+        paymentMethod: "upi",
+        upiTransactionId: transactionId,
+        notes: paymentFormData.notes,
+      });
+      setShowUpiModal(false);
+      router.push(`/orders/${order._id}?status=paid&method=upi`);
+    } catch (err) {
+      // Handle error implicitly
+    } finally {
+      setUpiConfirmLoading(false);
     }
   };
 
   // Math totals matching backend
   const subtotal = cart?.items.reduce((acc, item) => acc + item.menuItem.price * item.quantity, 0) || 0;
   const tax = Math.round(subtotal * 0.05);
-  const deliveryFee = subtotal > 50000 || subtotal === 0 ? 0 : 4000; // in paise (₹40.00 / free above ₹500)
+  const deliveryFee = subtotal > 50000 || subtotal === 0 ? 0 : 4000; // ₹40.00 / free above ₹500
   const total = subtotal + tax + deliveryFee;
 
   if (cartLoading) {
@@ -250,31 +231,17 @@ export default function CheckoutPage() {
         <form onSubmit={handleSubmit(handlePlaceOrderSubmit)} className="grid gap-8 lg:grid-cols-3 items-start">
           {/* Left Details Panel */}
           <div className="lg:col-span-2 space-y-6">
-            <FlowCard className="p-6 border-border/50 bg-white rounded-2xl shadow-sm space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-border/60">
-                <div>
-                  <h2 className="text-lg font-bold font-[family-name:var(--font-display)] text-foreground">
-                    1. Delivery Address
-                  </h2>
-                  <p className="text-xs text-muted-foreground">Specify where we should send your steaming hot meal.</p>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleGPSLocation}
-                  disabled={gpsLoading}
-                  className="rounded-xl border-flame-200 text-flame-600 hover:bg-flame-50 shrink-0 gap-2 text-xs font-semibold h-10 shadow-sm"
-                >
-                  <Location size={16} variant="Bold" className={gpsLoading ? "animate-bounce" : ""} />
-                  {gpsLoading ? "Locating..." : "Locate Me via GPS"}
-                </Button>
-              </div>
+            
+            {/* Map-based GPS Location Picker */}
+            <LocationPicker onLocationSelect={handleLocationPicked} />
 
-              {gpsError && (
-                <div className="bg-amber-50 text-amber-700 text-xs rounded-xl p-3 border border-amber-100 font-medium">
-                  ⚠️ {gpsError}
-                </div>
-              )}
+            <FlowCard className="p-6 border-border/50 bg-white rounded-2xl shadow-sm space-y-6">
+              <div className="pb-4 border-b border-border/60">
+                <h2 className="text-lg font-bold font-[family-name:var(--font-display)] text-foreground">
+                  1. Verify Delivery Address
+                </h2>
+                <p className="text-xs text-muted-foreground">Adjust address fields manually if needed.</p>
+              </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2 space-y-1.5">
@@ -339,7 +306,7 @@ export default function CheckoutPage() {
                 <p className="text-xs text-muted-foreground">Select how you want to pay for your delicious order.</p>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
                 <label
                   className={`flex items-center justify-between p-4 border rounded-2xl cursor-pointer transition-all duration-200 ${
                     paymentMethod === "cod"
@@ -352,13 +319,37 @@ export default function CheckoutPage() {
                       <Wallet3 size={20} variant="Bold" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-foreground">Cash on Delivery (COD)</p>
-                      <p className="text-[11px] text-muted-foreground">Pay with cash at your doorstep.</p>
+                      <p className="text-sm font-bold text-foreground">COD</p>
+                      <p className="text-[10px] text-muted-foreground">Pay at door.</p>
                     </div>
                   </div>
                   <input
                     type="radio"
                     value="cod"
+                    className="h-4 w-4 text-flame-500 focus:ring-flame-500 accent-flame-500 cursor-pointer"
+                    {...register("paymentMethod")}
+                  />
+                </label>
+
+                <label
+                  className={`flex items-center justify-between p-4 border rounded-2xl cursor-pointer transition-all duration-200 ${
+                    paymentMethod === "upi"
+                      ? "border-flame-500 bg-flame-50/20 shadow-sm"
+                      : "border-border hover:bg-cream-100/30"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-xl ${paymentMethod === "upi" ? "bg-flame-100 text-flame-600" : "bg-muted text-muted-foreground"}`}>
+                      <TickCircle size={20} variant="Bold" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-foreground">UPI QR</p>
+                      <p className="text-[10px] text-muted-foreground">Scan to pay.</p>
+                    </div>
+                  </div>
+                  <input
+                    type="radio"
+                    value="upi"
                     className="h-4 w-4 text-flame-500 focus:ring-flame-500 accent-flame-500 cursor-pointer"
                     {...register("paymentMethod")}
                   />
@@ -376,8 +367,8 @@ export default function CheckoutPage() {
                       <Card size={20} variant="Bold" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-foreground">Pay Online</p>
-                      <p className="text-[11px] text-muted-foreground">Stripe/Razorpay simulated gateway.</p>
+                      <p className="text-sm font-bold text-foreground">Card</p>
+                      <p className="text-[10px] text-muted-foreground">Pay online.</p>
                     </div>
                   </div>
                   <input
@@ -458,7 +449,7 @@ export default function CheckoutPage() {
               <Button
                 type="submit"
                 disabled={createOrderMutation.isPending}
-                className="w-full bg-flame-500 hover:bg-flame-600 text-white rounded-xl h-11 text-xs font-semibold gap-1.5 shadow-md shadow-flame-500/10 transition-all"
+                className="w-full bg-flame-500 hover:bg-flame-600 text-white rounded-xl h-11 text-xs font-semibold gap-1.5 shadow-md shadow-flame-500/10 transition-all cursor-pointer"
               >
                 {createOrderMutation.isPending ? (
                   "Processing Order..."
@@ -474,7 +465,7 @@ export default function CheckoutPage() {
         </form>
       </div>
 
-      {/* Simulated Premium Payment Gateway Modal */}
+      {/* Simulated Premium Card Payment Gateway Modal */}
       <AnimatePresence>
         {showPaymentModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
@@ -568,7 +559,7 @@ export default function CheckoutPage() {
                     </div>
 
                     <Button
-                      onClick={handleSimulatedPayment}
+                      onClick={handleSimulatedCardPayment}
                       disabled={paymentLoading}
                       className="w-full bg-[#111827] hover:bg-[#1f2937] text-white rounded-xl h-12 text-xs font-bold gap-2 mt-4"
                     >
@@ -621,6 +612,20 @@ export default function CheckoutPage() {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Real UPI QR Payment Modal */}
+      <AnimatePresence>
+        {showUpiModal && (
+          <UpiPayment
+            amount={total}
+            upiId="7991627968@mbk"
+            merchantName="Fast Food Buddy"
+            onPaymentConfirm={handleUpiPaymentConfirm}
+            onCancel={() => setShowUpiModal(false)}
+            isLoading={upiConfirmLoading}
+          />
         )}
       </AnimatePresence>
     </div>

@@ -3,6 +3,7 @@ import { env } from '../config/env.js';
 import { Category } from '../models/category.model.js';
 import { MenuItem } from '../models/menu-item.model.js';
 import { User } from '../models/user.model.js';
+import { slugify } from '../utils/slugify.js';
 
 const CATEGORIES_DATA = [
   {
@@ -281,17 +282,6 @@ const BASE_MENU_ITEMS = [
     cityFame: ['vns', 'luc', 'pra']
   }
 ];
-
-// Helper to convert strings to slug
-const slugify = (text: string) => {
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\-]+/g, '')
-    .replace(/\-\-+/g, '-');
-};
 
 // Generate 100+ Menu Items dynamically
 const generateMenuItems = () => {

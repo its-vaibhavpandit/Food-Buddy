@@ -74,18 +74,18 @@ export function CartItem({ item, isReadOnly = false }: CartItemProps) {
         </div>
         <p className="mt-1 text-xs text-muted-foreground">{formattedPrice} each</p>
 
-        {/* Mobile controls */}
+        {/* Unified controls (responsive sizing via CSS) */}
         {!isReadOnly && (
-          <div className="flex items-center gap-2 mt-2.5 sm:hidden">
+          <div className="flex items-center gap-2 sm:gap-3 mt-2.5 sm:mt-0">
             <div className="flex items-center border border-border/80 rounded-lg bg-cream-50/50">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 rounded-none"
+                className="h-7 w-7 sm:h-8 sm:w-8 rounded-none"
                 onClick={handleDecrement}
                 disabled={item.quantity <= 1 || updateQty.isPending}
               >
-                <Minus size={12} className="text-muted-foreground" />
+                <Minus size={14} className="text-muted-foreground scale-75 sm:scale-100" />
               </Button>
               <span className="w-8 text-center text-xs font-semibold text-foreground">
                 {item.quantity}
@@ -93,63 +93,25 @@ export function CartItem({ item, isReadOnly = false }: CartItemProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 rounded-none"
+                className="h-7 w-7 sm:h-8 sm:w-8 rounded-none"
                 onClick={handleIncrement}
                 disabled={updateQty.isPending}
               >
-                <Add size={12} className="text-muted-foreground" />
+                <Add size={14} className="text-muted-foreground scale-75 sm:scale-100" />
               </Button>
             </div>
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50/50 rounded-lg"
+              className="h-7 w-7 sm:h-8 sm:w-8 text-red-500 hover:text-red-600 hover:bg-red-50/50 rounded-lg"
               onClick={handleRemove}
               disabled={removeItem.isPending}
             >
-              <Trash size={14} variant="Bold" />
+              <Trash size={16} variant="Bold" className="scale-75 sm:scale-100" />
             </Button>
           </div>
         )}
       </div>
-
-      {/* Desktop controls */}
-      {!isReadOnly && (
-        <div className="hidden sm:flex items-center gap-3">
-          <div className="flex items-center border border-border/80 rounded-lg bg-cream-50/50">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-none"
-              onClick={handleDecrement}
-              disabled={item.quantity <= 1 || updateQty.isPending}
-            >
-              <Minus size={14} className="text-muted-foreground" />
-            </Button>
-            <span className="w-8 text-center text-xs font-semibold text-foreground">
-              {item.quantity}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-none"
-              onClick={handleIncrement}
-              disabled={updateQty.isPending}
-            >
-              <Add size={14} className="text-muted-foreground" />
-            </Button>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
-            onClick={handleRemove}
-            disabled={removeItem.isPending}
-          >
-            <Trash size={16} variant="Bold" />
-          </Button>
-        </div>
-      )}
 
       {/* Item Total */}
       <div className="text-right pl-2">

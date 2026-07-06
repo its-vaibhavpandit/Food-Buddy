@@ -1,21 +1,20 @@
 export interface User {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   phone?: string;
   role: "customer" | "admin";
   addresses: Address[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Address {
   _id: string;
-  label: string;
   street: string;
   city: string;
   state: string;
-  pincode: string;
+  zipCode: string;
   isDefault: boolean;
 }
 

@@ -1,19 +1,14 @@
 "use client";
 
+import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-  Timer1,
-  Star1,
-  Truck,
-  ArrowRight,
-  ShoppingCart,
-} from "iconsax-react";
+import { ArrowRight, Star, Timer, ChefHat, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatPrice } from "@/lib/utils";
+import { useMenuItems } from "@/hooks/use-menu";
+import { MenuCard } from "@/components/menu/menu-card";
 
 /* ─── Seed data (replaced by API in Phase 4) ──────────────── */
 
@@ -74,6 +69,28 @@ const POPULAR_ITEMS = [
   },
 ] as const;
 
+// Map static list to MenuItem look-alike if fallback is needed
+const FALLBACK_ITEMS = POPULAR_ITEMS.map((item) => ({
+  _id: item.id,
+  name: item.name,
+  slug: item.name.toLowerCase().replace(/ /g, "-"),
+  description: item.description,
+  price: item.price,
+  image: item.image,
+  isVeg: item.isVeg,
+  isAvailable: true,
+  tags: [item.category.toLowerCase()],
+  category: {
+    _id: item.id,
+    name: item.category,
+    slug: item.category.toLowerCase(),
+    sortOrder: 1,
+    isActive: true,
+  },
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+}));
+
 const CATEGORIES = [
   { name: "Chinese", image: "/images/noodles.jpg", slug: "chinese" },
   { name: "North Indian", image: "/images/idli.png", slug: "north-indian" },
@@ -85,12 +102,12 @@ const CATEGORIES = [
 
 const VALUE_PROPS = [
   {
-    icon: Timer1,
+    icon: Timer,
     title: "30-Minute Delivery",
     description: "Piping hot food at your door — fast, every single time.",
   },
   {
-    icon: Star1,
+    icon: ChefHat,
     title: "Chef-Crafted Quality",
     description:
       "Fresh ingredients, house-made sauces, and recipes perfected over years.",
@@ -121,6 +138,17 @@ const staggerContainer = {
 /* ─── Page ────────────────────────────────────────────────── */
 
 export default function HomePage() {
+  const { data: menuItems, isLoading: itemsLoading } = useMenuItems();
+  const [activeCity, setActiveCity] = useState("Varanasi");
+
+  useEffect(() => {
+    setActiveCity(localStorage.getItem("selectedCity") || "Varanasi");
+  }, []);
+
+  const popularItems = useMemo(() => {
+    return menuItems && menuItems.length > 0 ? menuItems.slice(0, 6) : FALLBACK_ITEMS;
+  }, [menuItems]);
+
   return (
     <div className="overflow-hidden">
       {/* ── Hero ──────────────────────────────────────────── */}
@@ -195,7 +223,7 @@ export default function HomePage() {
               className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground lg:justify-start"
             >
               <div className="flex items-center gap-1.5">
-                <Star1 size={16} variant="Bold" className="text-amber-500" />
+                <Star size={16} className="text-amber-500 fill-amber-500" />
                 <span className="font-medium">4.8 Rating</span>
               </div>
               <div className="h-4 w-px bg-border" />
@@ -335,52 +363,25 @@ export default function HomePage() {
             variants={staggerContainer}
             className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
           >
-            {POPULAR_ITEMS.map((item, i) => (
-              <motion.div key={item.id} custom={i} variants={fadeUp}>
-                <Card className="group relative overflow-hidden border-border/60 bg-white transition-all hover:shadow-lg hover:shadow-flame-500/5 hover:-translate-y-1 duration-300">
-                  {/* Image */}
-                  <div className="relative h-48 overflow-hidden bg-cream-100">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                    {/* Category badge */}
-                    <Badge className="absolute left-3 top-3 bg-white/90 text-foreground backdrop-blur-sm border-0 text-xs font-medium">
-                      {item.category}
-                    </Badge>
-                    {/* Veg indicator */}
-                    <div className="absolute right-3 top-3">
-                      <div className={item.isVeg ? "veg-badge" : "nonveg-badge"} />
-                    </div>
+            {itemsLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="border border-border/50 rounded-2xl p-4 bg-white space-y-4 animate-pulse">
+                  <div className="h-44 w-full bg-cream-100 rounded-xl" />
+                  <div className="h-6 w-3/4 bg-cream-100 rounded" />
+                  <div className="h-4 w-full bg-cream-100 rounded" />
+                  <div className="flex justify-between items-center">
+                    <div className="h-6 w-1/4 bg-cream-100/50 rounded" />
+                    <div className="h-9 w-1/3 bg-cream-100/50 rounded-xl" />
                   </div>
-
-                  {/* Content */}
-                  <div className="p-4">
-                    <h3 className="font-semibold text-foreground text-base">
-                      {item.name}
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                      {item.description}
-                    </p>
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-lg font-bold text-flame-600">
-                        {formatPrice(item.price)}
-                      </span>
-                      <Button
-                        size="sm"
-                        className="bg-flame-500 hover:bg-flame-600 text-white rounded-lg h-9 gap-1.5"
-                      >
-                        <ShoppingCart size={14} />
-                        Add
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
+                </div>
+              ))
+            ) : (
+              popularItems.map((item, i) => (
+                <motion.div key={item._id} custom={i} variants={fadeUp}>
+                  <MenuCard item={item as any} selectedCity={activeCity} />
+                </motion.div>
+              ))
+            )}
           </motion.div>
 
           {/* Mobile CTA */}
@@ -412,10 +413,10 @@ export default function HomePage() {
                   key={prop.title}
                   custom={i}
                   variants={fadeUp}
-                  className="group text-center"
+                  className="group text-center flex flex-col items-center"
                 >
-                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-flame-50 text-flame-500 transition-colors group-hover:bg-flame-500 group-hover:text-white">
-                    <Icon size={28} variant="Bold" />
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-flame-50/80 border border-flame-100/60 shadow-xs transition-transform duration-300 group-hover:scale-105">
+                    <Icon className="h-7 w-7 text-flame-500" strokeWidth={2} />
                   </div>
                   <h3 className="text-lg font-semibold text-foreground">
                     {prop.title}

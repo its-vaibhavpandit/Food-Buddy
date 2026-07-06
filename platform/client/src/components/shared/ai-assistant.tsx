@@ -32,7 +32,7 @@ function FoodieRobotLogo({ size = 32 }: { size?: number }) {
     <svg width={size} height={size} viewBox="12 8 40 44" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Chef Hat */}
       <path d="M18 18C18 13 22 10 26 10C28 10 30 11 32 12C34 11 36 10 38 10C42 10 46 13 46 18C46 22 42 24 38 24H26C22 24 18 22 18 18Z" fill="#FFF5EB" stroke="#FF6B35" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      <rect x="23" y="21" width="100" height="15" fill="#dfa67b" rx="1.5" />
+      <rect x="21" y="22" width="22" height="2.5" fill="#dfa67b" rx="1" />
 
       {/* Robot Head */}
       <rect x="16" y="27" width="32" height="25" rx="5" fill="#475569" stroke="#1E293B" strokeWidth="2.5" />

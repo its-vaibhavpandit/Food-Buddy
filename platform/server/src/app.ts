@@ -1,13 +1,14 @@
 import express from 'express';
+import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import { rateLimit } from 'express-rate-limit';
 import { env } from './config/env.js';
-import { connectDB } from './config/db.js';
-import { errorHandler } from './middleware/error.js';
+import { connectDB, closeDB } from './config/db.js';
+import { errorHandler, AppError } from './middleware/error.js';
 
-// Import Routes
 import authRoutes from './routes/auth.routes.js';
 import menuRoutes from './routes/menu.routes.js';
 import cartRoutes from './routes/cart.routes.js';
@@ -16,58 +17,69 @@ import adminRoutes from './routes/admin.routes.js';
 
 const app = express();
 
-// Connect to Database
-connectDB();
-
-// Global Middlewares
-app.use(helmet());
-
-// Custom CORS middleware to guarantee correct header configuration for credentials
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  
-  // Allow env.CLIENT_URL, localhost, and 127.0.0.1 in development
-  const allowedOrigins = [
-    env.CLIENT_URL,
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost',
-    'http://127.0.0.1'
-  ];
-
-  if (origin && (allowedOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:'))) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+// Database connection middleware — ensures connection is warm for serverless
+app.use(async (_req, _res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
   }
-  
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie');
-  
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(204);
-    return;
-  }
-  next();
 });
 
+// Security headers
+app.use(helmet());
+
+// Gzip/Brotli compression — reduces payload sizes ~70%
+app.use(compression());
+
+// CORS — production-safe configuration
+const allowedOrigins = [
+  env.CLIENT_URL,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+];
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) ||
+        (env.NODE_ENV === 'development' && (origin?.startsWith('http://localhost:') || origin?.startsWith('http://127.0.0.1:')))) {
+      callback(null, true);
+    } else {
+      callback(new AppError('Not allowed by CORS', 403));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+}));
+
+// Body parsing with size limits to prevent payload abuse
 app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 if (env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Rate Limiting
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100, // Limit each IP to 100 requests per windowMs
+// Global rate limiter — prevents brute-force across all routes
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 500,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
-  message: {
-    status: 'error',
-    message: 'Too many requests from this IP, please try again after 15 minutes'
-  }
+  message: { status: 'error', message: 'Too many requests, please try again later' },
+});
+app.use(globalLimiter);
+
+// Stricter rate limiter for auth routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { status: 'error', message: 'Too many auth attempts, please try again after 15 minutes' },
 });
 
 // Mount Routes
@@ -78,17 +90,57 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Health Check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Error handling middleware
+// 404 catch-all for unmatched routes
+app.all('*path', (req, _res, next) => {
+  next(new AppError(`Route ${req.method} ${req.originalUrl} not found`, 404));
+});
+
+// Error handling
 app.use(errorHandler);
 
-// Start Server
-const PORT = env.PORT;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running in ${env.NODE_ENV} mode on port ${PORT}`);
-});
+// Graceful shutdown / Serverless entry
+let server: ReturnType<typeof app.listen> | null = null;
+
+if (process.env.VERCEL) {
+  // Vercel serverless — no server.listen needed
+} else {
+  server = app.listen(env.PORT, () => {
+    console.log(`🚀 Server running in ${env.NODE_ENV} mode on port ${env.PORT}`);
+  });
+}
+
+const shutdown = async (signal: string) => {
+  console.log(`\n${signal} received. Shutting down gracefully...`);
+
+  if (server) {
+    server.close(async () => {
+      try {
+        await closeDB();
+      } catch (err) {
+        console.error('Error closing database:', err);
+      }
+      process.exit(0);
+    });
+  } else {
+    try {
+      await closeDB();
+    } catch (err) {
+      console.error('Error closing database:', err);
+    }
+    process.exit(0);
+  }
+
+  // Force shutdown after 10s if graceful fails
+  setTimeout(() => {
+    process.exit(1);
+  }, 10000).unref();
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 export default app;

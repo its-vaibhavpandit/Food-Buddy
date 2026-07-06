@@ -54,14 +54,14 @@ export function MenuCard({ item, onAddToCart, selectedCity }: MenuCardProps) {
   };
 
   return (
-    <Card className="group relative overflow-hidden border-border/60 bg-white transition-all hover:shadow-xl hover:shadow-flame-500/5 hover:-translate-y-1.5 duration-300 rounded-2xl">
+    <Card className="group relative overflow-hidden border-border/50 bg-white transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 duration-500 rounded-2xl">
       {/* Image Container */}
-      <div className="relative h-48 overflow-hidden bg-cream-100/50">
+      <div className="relative h-48 overflow-hidden bg-muted/30">
         <Image
           src={item.image}
           alt={item.name}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
 

@@ -1,38 +1,35 @@
 @echo off
-
-:: -------------------------------------------------
-:: Fast Food Buddy – Fresh Development Startup
-:: -------------------------------------------------
+title Fast Food Buddy Control Panel
 
 :: Ensure we are in the project root
 cd /d "%~dp0"
 
-:: Clean previous build artifacts
-if exist "platform\client\.next" (
-    echo Removing old .next folder...
-    rmdir /s /q "platform\client\.next"
+echo ==========================================================
+echo    🍔 WELCOME TO FAST FOOD BUDDY STARTUP CONTROL PANEL 🍔
+echo ==========================================================
+echo.
+
+:: Check for client and server environment files
+if not exist "platform\server\.env" (
+    echo [WARNING] platform\server\.env file is missing!
+    echo Please configure your MongoDB Atlas credentials and JWT keys first.
+    echo.
 )
 
-:: Delete any root package-lock.json (since package.json is in platform/client)
-if exist "package-lock.json" (
-    echo Deleting root package-lock.json...
-    del "package-lock.json"
-)
+:: 1. Launch Backend Server in a separate window
+echo [SERVER] Launching Express server on port 5000...
+start "Fast Food Buddy Backend" cmd /c "cd /d platform\server && echo [SERVER] Installing dependencies... && npm install && echo [SERVER] Starting server in dev mode... && npm run dev"
 
-:: OPTIONAL: Remove node_modules to force a full reinstall
-:: if exist "platform\client\node_modules" (
-::     echo Removing node_modules...
-::     rmdir /s /q "platform\client\node_modules"
-:: )
-
-:: Install fresh dependencies
+:: 2. Launch Frontend Next.js Client in the current window
+echo [CLIENT] Preparing Next.js client...
 cd /d "platform\client"
-echo Installing npm dependencies...
-npm install
 
-:: Start the Next.js development server
-echo Starting Next.js dev server...
+if not exist "node_modules" (
+    echo [CLIENT] Installing frontend dependencies...
+    call npm install
+)
+
+echo [CLIENT] Starting Next.js developer server...
 npm run dev
 
-:: Keep the console open after the server exits
 pause

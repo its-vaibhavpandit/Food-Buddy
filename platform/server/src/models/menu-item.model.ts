@@ -4,7 +4,7 @@ const menuItemSchema = new Schema({
   name: { type: String, required: true, trim: true },
   slug: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
   description: { type: String, required: true, trim: true },
-  price: { type: Number, required: true }, // price in rupees/base unit (can support decimals or we can store in rupees directly, e.g. 150)
+  price: { type: Number, required: true },
   image: { type: String, required: true },
   category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
   isVeg: { type: Boolean, default: true },
@@ -21,5 +21,8 @@ const menuItemSchema = new Schema({
 }, {
   timestamps: true
 });
+
+menuItemSchema.index({ name: 'text', description: 'text' });
+menuItemSchema.index({ category: 1, isAvailable: 1 });
 
 export const MenuItem = model('MenuItem', menuItemSchema);

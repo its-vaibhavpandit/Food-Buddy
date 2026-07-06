@@ -10,14 +10,14 @@ export type {
 
 /** Standard API response wrapper from the backend */
 export interface ApiResponse<T> {
-  success: boolean;
+  status: "success" | "error";
   data: T;
   message?: string;
 }
 
 /** Paginated API response */
 export interface PaginatedResponse<T> {
-  success: boolean;
+  status: "success" | "error";
   data: T[];
   pagination: {
     page: number;

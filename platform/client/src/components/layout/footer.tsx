@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   CallCalling,
   Clock,
@@ -74,11 +75,17 @@ export function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-flame-500 text-white font-bold text-lg">
-                F
+            <div className="flex items-center gap-2.5">
+              <div className="relative h-9 w-9 overflow-hidden rounded-xl bg-white/10 p-1 flex items-center justify-center border border-white/5 shadow-inner">
+                <Image
+                  src="/images/logo.svg"
+                  alt="Fast Food Buddy Logo"
+                  width={24}
+                  height={24}
+                  className="object-contain filter brightness-0 invert"
+                />
               </div>
-              <span className="text-lg font-bold tracking-tight text-white font-[family-name:var(--font-display)]">
+              <span className="text-lg font-black tracking-tight text-white font-[family-name:var(--font-display)]">
                 Fast Food
                 <span className="text-flame-400"> Buddy</span>
               </span>

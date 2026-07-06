@@ -39,25 +39,25 @@
   --color-cream-200: #fff0dd;
   --color-cream-300: #ffe4c4;
 
-  /* Semantic aliases */
-  --color-background: var(--color-cream-50);
-  --color-foreground: #1a1a1a;
-  --color-muted: #f5f1ec;
-  --color-muted-foreground: #6b6560;
+  /* Semantic aliases - Stripe/Linear Light Mode Aesthetic */
+  --color-background: #ffffff;
+  --color-foreground: #0a2540;
+  --color-muted: #f6f9fc;
+  --color-muted-foreground: #425466;
   --color-card: #ffffff;
-  --color-card-foreground: #1a1a1a;
+  --color-card-foreground: #0a2540;
   --color-popover: #ffffff;
-  --color-popover-foreground: #1a1a1a;
+  --color-popover-foreground: #0a2540;
   --color-primary: var(--color-flame-500);
   --color-primary-foreground: #ffffff;
-  --color-secondary: var(--color-cream-200);
-  --color-secondary-foreground: #1a1a1a;
-  --color-accent: var(--color-sage-500);
-  --color-accent-foreground: #ffffff;
+  --color-secondary: #f6f9fc;
+  --color-secondary-foreground: #0a2540;
+  --color-accent: #f6f9fc;
+  --color-accent-foreground: #0a2540;
   --color-destructive: #dc2626;
   --color-destructive-foreground: #ffffff;
-  --color-border: #e8e2db;
-  --color-input: #e8e2db;
+  --color-border: #e6ebf1;
+  --color-input: #e6ebf1;
   --color-ring: var(--color-flame-500);
 
   /* Radius */
@@ -70,12 +70,17 @@
 
 /* ─── Base Layer ──────────────────────────────────────────── */
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scrollbar-gutter: stable;
 }
 
 /* Scrollbar styling */

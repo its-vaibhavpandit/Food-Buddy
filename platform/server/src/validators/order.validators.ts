@@ -8,7 +8,8 @@ export const createOrderSchema = z.object({
       state: z.string().min(1, 'State is required'),
       zipCode: z.string().min(5, 'Zip code must be at least 5 digits'),
     }),
-    paymentMethod: z.enum(['cod', 'online']).default('cod'),
+    paymentMethod: z.enum(['cod', 'online', 'upi']).default('cod'),
+    upiTransactionId: z.string().min(6, 'UPI Transaction ID must be at least 6 characters').optional(),
     notes: z.string().optional(),
   })
 });
