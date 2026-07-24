@@ -84,7 +84,7 @@ const SOCIAL_LINKS = [
 
 export default function AboutPage() {
   return (
-    <div className="bg-cream-50/30 min-h-screen pb-16">
+    <div className="bg-[var(--color-bg)] min-h-screen pb-16">
       <PageHeader
         title="About Fast Food Buddy"
         description="Learn more about our mission, values, and our culinary journey."
@@ -101,18 +101,18 @@ export default function AboutPage() {
             <Badge className="bg-flame-50 text-flame-600 hover:bg-flame-50 border-flame-100 px-3 py-1 mb-4">
               🌱 Our Origins
             </Badge>
-            <h2 className="text-3xl font-bold font-[family-name:var(--font-display)] text-foreground sm:text-4xl">
+            <h2 className="text-3xl font-bold font-[family-name:var(--font-display)] text-[var(--color-text-primary)] sm:text-4xl">
               Fresh, Flavorful, Fast
             </h2>
             <h3 className="text-lg font-medium text-flame-500 mt-2">
               Crafting Unforgettable Food Moments
             </h3>
-            <p className="mt-5 text-muted-foreground leading-relaxed">
+            <p className="mt-5 text-[var(--color-text-secondary)] leading-relaxed">
               At Fast Food Buddy, our journey started with a simple passion: to create food that brings people together. 
               We wanted to break the stereotype of greasy, unhealthy fast food. 
               By incorporating fresh, locally sourced farm produce, balanced nutrients, and chef-level expertise, we recreate classics you love without compromising your health.
             </p>
-            <p className="mt-4 text-muted-foreground leading-relaxed">
+            <p className="mt-4 text-[var(--color-text-secondary)] leading-relaxed">
               Whether it’s a classic chicken cheeseburger, fresh spring rolls, or our signature aromatic biryani, every single item in our catalog is engineered to order and crafted with love and care.
             </p>
           </motion.div>
@@ -165,10 +165,10 @@ export default function AboutPage() {
         {/* Values Section */}
         <section className="mt-20">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-3xl font-bold font-[family-name:var(--font-display)] text-foreground">
+            <h2 className="text-3xl font-bold font-[family-name:var(--font-display)] text-[var(--color-text-primary)]">
               What Sets Us Apart
             </h2>
-            <p className="text-muted-foreground mt-2 text-sm">
+            <p className="text-[var(--color-text-secondary)] mt-2 text-sm">
               We stand for quality, nutrition transparency, and lightning-fast customer delivery.
             </p>
           </div>
@@ -183,14 +183,14 @@ export default function AboutPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: i * 0.1 }}
                 >
-                  <Card className="p-6 text-center border-border/50 bg-white hover:shadow-lg transition-shadow rounded-2xl">
+                  <Card className="p-6 text-center border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] hover:shadow-lg transition-shadow rounded-2xl">
                     <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-flame-50 text-flame-500">
                       <Icon size={24} variant="Bold" />
                     </div>
-                    <h3 className="font-semibold text-foreground text-base">
+                    <h3 className="font-semibold text-[var(--color-text-primary)] text-base">
                       {val.title}
                     </h3>
-                    <p className="mt-2.5 text-xs text-muted-foreground leading-relaxed">
+                    <p className="mt-2.5 text-xs text-[var(--color-text-secondary)] leading-relaxed">
                       {val.description}
                     </p>
                   </Card>
@@ -201,13 +201,13 @@ export default function AboutPage() {
         </section>
 
         {/* Testimonial Section */}
-        <section className="mt-20 bg-white border border-border/60 rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-sm">
+        <section className="mt-20 bg-[var(--color-card-bg)] border border-[var(--color-border-val)]/60 rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-sm">
           <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-flame-50/50 blur-2xl" />
           <div className="relative z-10 max-w-3xl mx-auto text-center">
             <Badge className="bg-amber-50 text-amber-700 hover:bg-amber-50 border-amber-200 px-3 py-1 mb-5">
               🏆 Customers&apos; Choice
             </Badge>
-            <p className="text-lg sm:text-xl font-medium italic text-foreground leading-relaxed">
+            <p className="text-lg sm:text-xl font-medium italic text-[var(--color-text-primary)] leading-relaxed">
               “I can&apos;t say enough about how amazing my experience has been with Fast Food Buddy! 
               The burgers are juicy, flavorful, and cooked to perfection. The built-in AI nutritionist and calorie tracker in their menu page makes it so easy to keep check of what I eat. Service is lightning fast!”
             </p>
@@ -218,10 +218,10 @@ export default function AboutPage() {
               <Star1 size={16} variant="Bold" className="text-amber-500" />
               <Star1 size={16} variant="Bold" className="text-amber-500" />
             </div>
-            <p className="mt-4 font-bold text-foreground text-sm">
+            <p className="mt-4 font-bold text-[var(--color-text-primary)] text-sm">
               Vaibhav Pandit
             </p>
-            <p className="text-xs text-muted-foreground">Regular Customer</p>
+            <p className="text-xs text-[var(--color-text-secondary)]">Regular Customer</p>
           </div>
         </section>
 
@@ -230,10 +230,10 @@ export default function AboutPage() {
           <Badge className="bg-flame-50 text-flame-600 hover:bg-flame-50 border-flame-100 px-3 py-1 mb-4">
             💬 Get In Touch
           </Badge>
-          <h2 className="text-3xl font-bold font-[family-name:var(--font-display)] text-foreground">
+          <h2 className="text-3xl font-bold font-[family-name:var(--font-display)] text-[var(--color-text-primary)]">
             Connect With Us
           </h2>
-          <p className="text-muted-foreground mt-2 max-w-xl mx-auto text-sm">
+          <p className="text-[var(--color-text-secondary)] mt-2 max-w-xl mx-auto text-sm">
             Follow our social channels to stay updated on special chef recommendations, seasonal items, and exclusive discounts.
           </p>
 
@@ -245,7 +245,7 @@ export default function AboutPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={social.label}
-                className={`flex h-12 w-12 items-center justify-center rounded-2xl border border-border bg-white text-muted-foreground shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:scale-110 active:scale-95 ${social.hoverClass}`}
+                className={`flex h-12 w-12 items-center justify-center rounded-2xl border border-[var(--color-border-val)] bg-[var(--color-card-bg)] text-[var(--color-text-secondary)] shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:scale-110 active:scale-95 ${social.hoverClass}`}
               >
                 {social.icon("w-6 h-6 transition-transform duration-300")}
               </a>

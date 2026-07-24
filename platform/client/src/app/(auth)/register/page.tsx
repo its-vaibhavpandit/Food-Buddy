@@ -62,7 +62,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-cream-50/40">
+    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-[var(--color-bg)]">
       {/* Decorative Blur Backgrounds */}
       <div className="pointer-events-none absolute -right-24 top-12 h-80 w-80 rounded-full bg-flame-100/40 blur-3xl" />
       <div className="pointer-events-none absolute -left-20 bottom-12 h-80 w-80 rounded-full bg-sage-100/30 blur-3xl" />
@@ -75,21 +75,21 @@ export default function RegisterPage() {
       >
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground mb-6 transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] mb-6 transition-colors"
         >
           <ArrowLeft size={16} />
           Back to home
         </Link>
 
-        <Card className="p-8 border-border/60 bg-white shadow-xl shadow-flame-500/5 rounded-2xl">
+        <Card className="p-8 border-[var(--color-border-val)]/60 bg-[var(--color-card-bg)] shadow-xl shadow-flame-500/5 rounded-2xl">
           <div className="text-center mb-8">
             <Badge className="bg-flame-50 text-flame-600 hover:bg-flame-50 border-flame-100 px-3 py-1 mb-3">
               ✨ Create Account
             </Badge>
-            <h1 className="text-2xl font-bold text-foreground font-[family-name:var(--font-display)]">
+            <h1 className="text-2xl font-bold text-[var(--color-text-primary)] font-[family-name:var(--font-display)]">
               Join Fast Food Buddy
             </h1>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-[var(--color-text-secondary)] mt-2">
               Create an account to start ordering delicious bites.
             </p>
           </div>
@@ -107,19 +107,19 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Full Name */}
             <div className="space-y-1.5">
-              <label htmlFor="name" className="text-sm font-medium text-foreground">
+              <label htmlFor="name" className="text-sm font-medium text-[var(--color-text-primary)]">
                 Full Name
               </label>
               <div className="relative">
                 <User
                   size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
                 />
                 <Input
                   id="name"
                   type="text"
                   placeholder="John Doe"
-                  className="pl-11 h-11 border-border rounded-xl focus-visible:ring-flame-500 focus-visible:border-flame-500"
+                  className="pl-11 h-11 border-[var(--color-border-val)] rounded-xl focus-visible:ring-flame-500 focus-visible:border-flame-500"
                   {...register("name")}
                 />
               </div>
@@ -132,19 +132,19 @@ export default function RegisterPage() {
 
             {/* Email Address */}
             <div className="space-y-1.5">
-              <label htmlFor="email" className="text-sm font-medium text-foreground">
+              <label htmlFor="email" className="text-sm font-medium text-[var(--color-text-primary)]">
                 Email Address
               </label>
               <div className="relative">
                 <Sms
                   size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
                 />
                 <Input
                   id="email"
                   type="email"
                   placeholder="name@example.com"
-                  className="pl-11 h-11 border-border rounded-xl focus-visible:ring-flame-500 focus-visible:border-flame-500"
+                  className="pl-11 h-11 border-[var(--color-border-val)] rounded-xl focus-visible:ring-flame-500 focus-visible:border-flame-500"
                   {...register("email")}
                 />
               </div>
@@ -157,19 +157,19 @@ export default function RegisterPage() {
 
             {/* Phone Number */}
             <div className="space-y-1.5">
-              <label htmlFor="phone" className="text-sm font-medium text-foreground">
+              <label htmlFor="phone" className="text-sm font-medium text-[var(--color-text-primary)]">
                 Phone Number
               </label>
               <div className="relative">
                 <Call
                   size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
                 />
                 <Input
                   id="phone"
                   type="tel"
                   placeholder="9876543210"
-                  className="pl-11 h-11 border-border rounded-xl focus-visible:ring-flame-500 focus-visible:border-flame-500"
+                  className="pl-11 h-11 border-[var(--color-border-val)] rounded-xl focus-visible:ring-flame-500 focus-visible:border-flame-500"
                   {...register("phone")}
                 />
               </div>
@@ -182,19 +182,19 @@ export default function RegisterPage() {
 
             {/* Password */}
             <div className="space-y-1.5">
-              <label htmlFor="password" className="text-sm font-medium text-foreground">
+              <label htmlFor="password" className="text-sm font-medium text-[var(--color-text-primary)]">
                 Password
               </label>
               <div className="relative">
                 <Lock
                   size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
                 />
                 <Input
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  className="pl-11 h-11 border-border rounded-xl focus-visible:ring-flame-500 focus-visible:border-flame-500"
+                  className="pl-11 h-11 border-[var(--color-border-val)] rounded-xl focus-visible:ring-flame-500 focus-visible:border-flame-500"
                   {...register("password")}
                 />
               </div>
@@ -209,20 +209,20 @@ export default function RegisterPage() {
             <div className="space-y-1.5">
               <label
                 htmlFor="confirmPassword"
-                className="text-sm font-medium text-foreground"
+                className="text-sm font-medium text-[var(--color-text-primary)]"
               >
                 Confirm Password
               </label>
               <div className="relative">
                 <Lock
                   size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
                 />
                 <Input
                   id="confirmPassword"
                   type="password"
                   placeholder="••••••••"
-                  className="pl-11 h-11 border-border rounded-xl focus-visible:ring-flame-500 focus-visible:border-flame-500"
+                  className="pl-11 h-11 border-[var(--color-border-val)] rounded-xl focus-visible:ring-flame-500 focus-visible:border-flame-500"
                   {...register("confirmPassword")}
                 />
               </div>
@@ -243,8 +243,8 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <div className="text-center mt-8 pt-6 border-t border-border/50">
-            <p className="text-sm text-muted-foreground">
+          <div className="text-center mt-8 pt-6 border-t border-[var(--color-border-val)]/50">
+            <p className="text-sm text-[var(--color-text-secondary)]">
               Already have an account?{" "}
               <Link
                 href="/login"

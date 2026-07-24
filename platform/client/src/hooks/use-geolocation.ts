@@ -25,7 +25,7 @@ export function useGeolocation() {
   });
 
   const getLocation = useCallback(() => {
-    if (!navigator.geolocation) {
+    if (typeof window === "undefined" || !navigator.geolocation) {
       setState((prev) => ({
         ...prev,
         error: "Geolocation is not supported by your browser.",
@@ -46,46 +46,50 @@ export function useGeolocation() {
             latitude,
             longitude,
             accuracy,
-            loading: true, // remains loading while geocoding
+            loading: true,
           }));
 
           try {
-            // Reverse geocoding via OpenStreetMap Nominatim
             const response = await fetch(
               `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
             );
-            const data = await response.json();
+            
+            if (response.ok) {
+              const data = await response.json();
+              if (data && data.address) {
+                const addr = data.address;
+                const road = addr.road || addr.suburb || addr.neighbourhood || "";
+                const house = addr.house_number ? `${addr.house_number}, ` : "";
+                const street = `${house}${road}`.trim() || "GPS Spot";
+                const city = addr.city || addr.town || addr.village || addr.county || "Local Area";
+                const stateName = addr.state || "Uttar Pradesh";
+                const zipCode = (addr.postcode || "").replace(/\s/g, "");
 
-            if (data && data.address) {
-              const addr = data.address;
-              const road = addr.road || addr.suburb || addr.neighbourhood || "";
-              const house = addr.house_number ? `${addr.house_number}, ` : "";
-              const street = `${house}${road}`.trim() || "GPS Location";
-              const city = addr.city || addr.town || addr.village || addr.county || "";
-              const stateName = addr.state || "";
-              const zipCode = (addr.postcode || "").replace(/\s/g, "");
+                const addressObj = { street, city, state: stateName, zipCode };
 
-              const addressObj = { street, city, state: stateName, zipCode };
-
-              setState((prev) => ({
-                ...prev,
-                loading: false,
-                address: addressObj,
-              }));
-              resolve({ latitude, longitude });
-            } else {
-              setState((prev) => ({
-                ...prev,
-                loading: false,
-                error: "Failed to parse address details from GPS.",
-              }));
-              resolve({ latitude, longitude });
+                setState((prev) => ({
+                  ...prev,
+                  loading: false,
+                  address: addressObj,
+                }));
+                resolve({ latitude, longitude });
+                return;
+              }
             }
-          } catch (err) {
+
+            // Fallback if nominatim API fails or blocks
             setState((prev) => ({
               ...prev,
               loading: false,
-              error: "Reverse geocoding connection failed.",
+              address: { street: "GPS Location", city: "Current Spot", state: "Local Area", zipCode: "" },
+            }));
+            resolve({ latitude, longitude });
+          } catch {
+            // Quiet fallback without breaking UI
+            setState((prev) => ({
+              ...prev,
+              loading: false,
+              address: { street: "GPS Location", city: "Current Spot", state: "Local Area", zipCode: "" },
             }));
             resolve({ latitude, longitude });
           }
@@ -93,7 +97,7 @@ export function useGeolocation() {
         (error) => {
           let msg = "Could not fetch GPS coordinates.";
           if (error.code === error.PERMISSION_DENIED) {
-            msg = "Location permission denied. Please allow access in browser settings.";
+            msg = "Location permission denied. Please allow access in browser settings or use the search bar.";
           } else if (error.code === error.POSITION_UNAVAILABLE) {
             msg = "Location information is unavailable.";
           } else if (error.code === error.TIMEOUT) {

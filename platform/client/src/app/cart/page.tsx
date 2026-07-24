@@ -26,7 +26,7 @@ export default function CartPage() {
   const cartItemCount = cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
   return (
-    <div className="bg-cream-50/30 min-h-screen pb-16">
+    <div className="bg-[var(--color-bg)] min-h-screen pb-16">
       <PageHeader
         title="Your Cart"
         description="Review your selected items and customize quantities before checkout."
@@ -40,15 +40,15 @@ export default function CartPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <Card className="max-w-md mx-auto p-8 text-center border-border/50 bg-white rounded-2xl shadow-sm space-y-5">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cream-50 text-cream-600">
+            <Card className="max-w-md mx-auto p-8 text-center border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl shadow-sm space-y-5">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg)] text-cream-600">
                 <ShoppingCart size={32} />
               </div>
               <div className="space-y-2">
-                <h3 className="text-lg font-bold text-foreground font-[family-name:var(--font-display)]">
+                <h3 className="text-lg font-bold text-[var(--color-text-primary)] font-[family-name:var(--font-display)]">
                   Log In to View Your Cart
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
                   We sync your cart items dynamically to your profile so you can place orders seamlessly across all your devices.
                 </p>
               </div>
@@ -62,17 +62,17 @@ export default function CartPage() {
           <div className="grid gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-4">
               {[1, 2].map((n) => (
-                <Card key={n} className="p-4 border-border/50 bg-white rounded-2xl flex gap-4 items-center animate-pulse">
-                  <div className="h-16 w-16 bg-cream-100 rounded-xl" />
+                <Card key={n} className="p-4 border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl flex gap-4 items-center animate-pulse">
+                  <div className="h-16 w-16 bg-[var(--color-surface)] rounded-xl" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-4 w-1/3 bg-cream-100 rounded" />
-                    <div className="h-3 w-1/4 bg-cream-100 rounded" />
+                    <div className="h-4 w-1/3 bg-[var(--color-surface)] rounded" />
+                    <div className="h-3 w-1/4 bg-[var(--color-surface)] rounded" />
                   </div>
-                  <div className="h-4 w-16 bg-cream-100 rounded" />
+                  <div className="h-4 w-16 bg-[var(--color-surface)] rounded" />
                 </Card>
               ))}
             </div>
-            <div className="h-48 bg-white border border-border/50 rounded-2xl animate-pulse" />
+            <div className="h-48 bg-[var(--color-card-bg)] border border-[var(--color-border-val)]/50 rounded-2xl animate-pulse" />
           </div>
         ) : !cart || cart.items.length === 0 ? (
           /* Empty Cart View */
@@ -81,15 +81,15 @@ export default function CartPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <Card className="max-w-md mx-auto p-8 text-center border-border/50 bg-white rounded-2xl shadow-sm space-y-5">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cream-50 text-cream-400">
+            <Card className="max-w-md mx-auto p-8 text-center border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl shadow-sm space-y-5">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg)] text-cream-400">
                 <ShoppingCart size={32} />
               </div>
               <div className="space-y-2">
-                <h3 className="text-lg font-bold text-foreground font-[family-name:var(--font-display)]">
+                <h3 className="text-lg font-bold text-[var(--color-text-primary)] font-[family-name:var(--font-display)]">
                   Your Cart is Empty
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
                   Looks like you haven&apos;t added any yummy bites to your cart yet. Head to our menu to discover our famous special recipes!
                 </p>
               </div>
@@ -97,7 +97,7 @@ export default function CartPage() {
                 <Button className="w-full bg-flame-500 hover:bg-flame-600 text-white rounded-xl py-5" asChild>
                   <Link href="/menu">Explore Menu</Link>
                 </Button>
-                <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground rounded-xl" asChild>
+                <Button variant="ghost" className="w-full text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] rounded-xl" asChild>
                   <Link href="/" className="flex items-center justify-center gap-1.5">
                     <ArrowLeft size={16} /> Back to Home
                   </Link>
@@ -110,9 +110,9 @@ export default function CartPage() {
           <div className="grid gap-8 lg:grid-cols-3 items-start">
             {/* Left Items Column */}
             <div className="lg:col-span-2 space-y-4">
-              <Card className="p-6 border-border/50 bg-white rounded-2xl shadow-sm">
-                <div className="flex justify-between items-center pb-4 border-b border-border/60">
-                  <span className="text-sm font-semibold text-foreground">
+              <Card className="p-6 border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl shadow-sm">
+                <div className="flex justify-between items-center pb-4 border-b border-[var(--color-border-val)]/60">
+                  <span className="text-sm font-semibold text-[var(--color-text-primary)]">
                     Selected Dishes ({cartItemCount})
                   </span>
                   <Button
@@ -144,7 +144,7 @@ export default function CartPage() {
 
               {/* Continue Shopping CTA */}
               <div className="text-left">
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground gap-1.5 rounded-xl px-0" asChild>
+                <Button variant="ghost" className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] gap-1.5 rounded-xl px-0" asChild>
                   <Link href="/menu">
                     <ArrowLeft size={16} /> Continue Shopping
                   </Link>

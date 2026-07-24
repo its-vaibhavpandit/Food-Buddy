@@ -6,7 +6,7 @@ import { AppError } from './error.js';
 export interface AuthRequest extends Request {
   user?: {
     id: string;
-    role: 'customer' | 'admin';
+    role: 'customer' | 'admin' | 'restaurant';
   };
 }
 
@@ -29,4 +29,16 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
   } catch (error) {
     next(new AppError('Invalid or expired token', 401));
   }
+};
+
+export const protect = authenticate;
+
+export const restrictTo = (...roles: string[]) => {
+  return (req: AuthRequest, _res: Response, next: NextFunction): void => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      next(new AppError('You do not have permission to perform this action', 403));
+      return;
+    }
+    next();
+  };
 };

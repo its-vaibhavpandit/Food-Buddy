@@ -7,6 +7,8 @@ const menuItemSchema = new Schema({
   price: { type: Number, required: true },
   image: { type: String, required: true },
   category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+  restaurant: { type: Schema.Types.ObjectId, ref: 'Restaurant', index: true },
+  unsplashId: { type: String },
   isVeg: { type: Boolean, default: true },
   isAvailable: { type: Boolean, default: true },
   tags: [{ type: String }],

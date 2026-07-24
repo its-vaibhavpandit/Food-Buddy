@@ -4,6 +4,7 @@ import { Cart } from '../models/cart.model.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/error.js';
 import { catchAsync } from '../middleware/async-handler.js';
+import { emitNewOrderPlaced } from '../config/socket.js';
 
 export const createOrder = catchAsync(async (req: AuthRequest, res: Response) => {
   const { deliveryAddress, paymentMethod, upiTransactionId, notes } = req.body;
@@ -58,6 +59,9 @@ export const createOrder = catchAsync(async (req: AuthRequest, res: Response) =>
   // Clear cart after order placement
   cart.items = [] as any;
   await cart.save();
+
+  // Broadcast new order to Admin dashboard WebSocket listener
+  emitNewOrderPlaced(order.toObject());
 
   res.status(201).json({
     status: 'success',

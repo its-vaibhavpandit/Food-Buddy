@@ -49,9 +49,9 @@ export function CartItem({ item, isReadOnly = false }: CartItemProps) {
   });
 
   return (
-    <div className="flex gap-4 border-b border-border/60 py-4 last:border-0 items-center justify-between">
+    <div className="flex gap-4 border-b border-[var(--color-border-val)]/60 py-4 last:border-0 items-center justify-between">
       {/* Product Image */}
-      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted border border-border/40">
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted border border-[var(--color-border-val)]/40">
         <Image
           src={item.menuItem.image}
           alt={item.menuItem.name}
@@ -68,16 +68,16 @@ export function CartItem({ item, isReadOnly = false }: CartItemProps) {
               item.menuItem.isVeg ? "bg-green-500" : "bg-red-500"
             }`}
           />
-          <h4 className="truncate text-sm font-semibold text-foreground">
+          <h4 className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
             {item.menuItem.name}
           </h4>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">{formattedPrice} each</p>
+        <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{formattedPrice} each</p>
 
         {/* Unified controls (responsive sizing via CSS) */}
         {!isReadOnly && (
           <div className="flex items-center gap-2 sm:gap-3 mt-2.5 sm:mt-0">
-            <div className="flex items-center border border-border/80 rounded-lg bg-cream-50/50">
+            <div className="flex items-center border border-[var(--color-border-val)]/80 rounded-lg bg-[var(--color-bg)]/50">
               <Button
                 variant="ghost"
                 size="icon"
@@ -85,9 +85,9 @@ export function CartItem({ item, isReadOnly = false }: CartItemProps) {
                 onClick={handleDecrement}
                 disabled={item.quantity <= 1 || updateQty.isPending}
               >
-                <Minus size={14} className="text-muted-foreground scale-75 sm:scale-100" />
+                <Minus size={14} className="text-[var(--color-text-secondary)] scale-75 sm:scale-100" />
               </Button>
-              <span className="w-8 text-center text-xs font-semibold text-foreground">
+              <span className="w-8 text-center text-xs font-semibold text-[var(--color-text-primary)]">
                 {item.quantity}
               </span>
               <Button
@@ -97,7 +97,7 @@ export function CartItem({ item, isReadOnly = false }: CartItemProps) {
                 onClick={handleIncrement}
                 disabled={updateQty.isPending}
               >
-                <Add size={14} className="text-muted-foreground scale-75 sm:scale-100" />
+                <Add size={14} className="text-[var(--color-text-secondary)] scale-75 sm:scale-100" />
               </Button>
             </div>
             <Button
@@ -115,7 +115,7 @@ export function CartItem({ item, isReadOnly = false }: CartItemProps) {
 
       {/* Item Total */}
       <div className="text-right pl-2">
-        <span className="text-sm font-semibold text-foreground">{formattedItemTotal}</span>
+        <span className="text-sm font-semibold text-[var(--color-text-primary)]">{formattedItemTotal}</span>
       </div>
     </div>
   );

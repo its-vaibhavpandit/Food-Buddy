@@ -46,14 +46,14 @@ export default function OrdersPage() {
 
   if (authLoading || ordersLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-cream-50/20">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg)]">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-flame-200 border-t-flame-500" />
       </div>
     );
   }
 
   return (
-    <div className="bg-cream-50/30 min-h-screen pb-16">
+    <div className="bg-[var(--color-bg)] min-h-screen pb-16">
       <PageHeader
         title="Your Orders"
         description="Track your active deliveries and review your culinary history with us."
@@ -66,15 +66,15 @@ export default function OrdersPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <FlowCard className="p-8 text-center border-border/50 bg-white rounded-2xl shadow-sm space-y-5">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cream-50 text-cream-600">
+            <FlowCard className="p-8 text-center border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl shadow-sm space-y-5">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg)] text-cream-600">
                 <ShoppingBag size={32} />
               </div>
               <div className="space-y-2">
-                <h3 className="text-lg font-bold text-foreground font-[family-name:var(--font-display)]">
+                <h3 className="text-lg font-bold text-[var(--color-text-primary)] font-[family-name:var(--font-display)]">
                   No Orders Found
                 </h3>
-                <p className="text-xs text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
+                <p className="text-xs text-[var(--color-text-secondary)] max-w-[280px] mx-auto leading-relaxed">
                   Looks like you haven&apos;t ordered anything yet. Head to our menu and grab some spicy deals!
                 </p>
               </div>
@@ -102,19 +102,19 @@ export default function OrdersPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: i * 0.05 }}
                 >
-                  <FlowCard className="p-6 border-border/60 bg-white hover:shadow-md transition-shadow rounded-2xl space-y-5">
+                  <FlowCard className="p-6 border-[var(--color-border-val)]/60 bg-[var(--color-card-bg)] hover:shadow-md transition-shadow rounded-2xl space-y-5">
                     {/* Header Row */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border/50">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--color-border-val)]/50">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-foreground">
+                          <span className="text-sm font-bold text-[var(--color-text-primary)]">
                             Order #{order._id.substring(order._id.length - 8).toUpperCase()}
                           </span>
                           <Badge className={`${statusConfig.className} font-semibold text-[10px] px-2 py-0.5 border`}>
                             {statusConfig.label}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <div className="flex items-center gap-1.5 text-[11px] text-[var(--color-text-secondary)]">
                           <Calendar size={12} />
                           <span>{orderDate}</span>
                         </div>
@@ -138,25 +138,25 @@ export default function OrdersPage() {
                     <div className="grid gap-4 sm:grid-cols-3 text-xs">
                       {/* Items Summaries */}
                       <div className="sm:col-span-2 space-y-2">
-                        <p className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">
+                        <p className="font-semibold text-[var(--color-text-secondary)] uppercase text-[10px] tracking-wider">
                           Items ordered
                         </p>
-                        <div className="text-foreground font-medium space-y-1">
+                        <div className="text-[var(--color-text-primary)] font-medium space-y-1">
                           {order.items.map((item) => (
                             <p key={item.menuItem}>
-                              • {item.name} <span className="text-muted-foreground text-[11px] font-normal">x{item.quantity}</span>
+                              • {item.name} <span className="text-[var(--color-text-secondary)] text-[11px] font-normal">x{item.quantity}</span>
                             </p>
                           ))}
                         </div>
                       </div>
 
                       {/* Payment/Price Summaries */}
-                      <div className="space-y-3 sm:border-l sm:border-border/60 sm:pl-6">
+                      <div className="space-y-3 sm:border-l sm:border-[var(--color-border-val)]/60 sm:pl-6">
                         <div className="space-y-1">
-                          <p className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">
+                          <p className="font-semibold text-[var(--color-text-secondary)] uppercase text-[10px] tracking-wider">
                             Payment method
                           </p>
-                          <div className="flex items-center gap-1.5 font-bold text-foreground">
+                          <div className="flex items-center gap-1.5 font-bold text-[var(--color-text-primary)]">
                             {order.paymentMethod === "online" ? (
                               <>
                                 <Card size={14} className="text-flame-500" />
@@ -172,7 +172,7 @@ export default function OrdersPage() {
                         </div>
 
                         <div className="space-y-0.5">
-                          <p className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider">
+                          <p className="font-semibold text-[var(--color-text-secondary)] uppercase text-[10px] tracking-wider">
                             Total amount
                           </p>
                           <p className="text-base font-extrabold text-flame-600">

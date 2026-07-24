@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useMenuItems } from "@/hooks/use-menu";
 import { MenuCard } from "@/components/menu/menu-card";
+import { fadeUp, staggerContainer } from "@/lib/motion";
+
 
 /* ─── Seed data (replaced by API in Phase 4) ──────────────── */
 
@@ -18,7 +20,7 @@ const POPULAR_ITEMS = [
     name: "Classic Cheeseburger",
     description: "Juicy patty with melted cheese, lettuce, and house sauce",
     price: 9900,
-    image: "/images/burger.jpg",
+    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80",
     isVeg: false,
     category: "Burgers",
   },
@@ -27,7 +29,7 @@ const POPULAR_ITEMS = [
     name: "Margherita Pizza",
     description: "Hand-tossed crust with mozzarella, basil, and tomato sauce",
     price: 25000,
-    image: "/images/pizza.png",
+    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80",
     isVeg: true,
     category: "Pizza",
   },
@@ -36,7 +38,7 @@ const POPULAR_ITEMS = [
     name: "Hyderabadi Biryani",
     description: "Fragrant basmati rice layered with aromatic spices",
     price: 24900,
-    image: "/images/biryani.jpg",
+    image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80",
     isVeg: false,
     category: "North Indian",
   },
@@ -45,7 +47,7 @@ const POPULAR_ITEMS = [
     name: "Crispy Samosa",
     description: "Golden-fried pastry stuffed with spiced potato filling",
     price: 1500,
-    image: "/images/samosa.png",
+    image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80",
     isVeg: true,
     category: "Street Food",
   },
@@ -54,7 +56,7 @@ const POPULAR_ITEMS = [
     name: "Chilli Potato",
     description: "Crispy potato strips tossed in tangy chilli-garlic sauce",
     price: 8900,
-    image: "/images/chillipotato.png",
+    image: "https://images.unsplash.com/photo-1576107232684-1279f390859f?auto=format&fit=crop&w=800&q=80",
     isVeg: true,
     category: "Street Food",
   },
@@ -63,7 +65,7 @@ const POPULAR_ITEMS = [
     name: "Steamed Momos",
     description: "Soft dumplings filled with fresh veggies, served with chutney",
     price: 4900,
-    image: "/images/momo.png",
+    image: "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?auto=format&fit=crop&w=800&q=80",
     isVeg: true,
     category: "Chinese",
   },
@@ -92,12 +94,12 @@ const FALLBACK_ITEMS = POPULAR_ITEMS.map((item) => ({
 }));
 
 const CATEGORIES = [
-  { name: "Chinese", image: "/images/noodles.jpg", slug: "chinese" },
-  { name: "North Indian", image: "/images/idli.png", slug: "north-indian" },
-  { name: "Street Food", image: "/images/pani.png", slug: "street-food" },
-  { name: "Burgers", image: "/images/burger.jpg", slug: "burgers" },
-  { name: "Drinks", image: "/images/soda.png", slug: "drinks" },
-  { name: "Rolls", image: "/images/rolls.jpg", slug: "rolls" },
+  { name: "Chinese", image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=800&q=80", slug: "chinese" },
+  { name: "North Indian", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80", slug: "north-indian" },
+  { name: "Street Food", image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80", slug: "street-food" },
+  { name: "Burgers", image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80", slug: "burgers" },
+  { name: "Drinks", image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=800&q=80", slug: "drinks" },
+  { name: "Rolls", image: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80", slug: "rolls" },
 ] as const;
 
 const VALUE_PROPS = [
@@ -119,22 +121,6 @@ const VALUE_PROPS = [
   },
 ] as const;
 
-/* ─── Animations ──────────────────────────────────────────── */
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.1, duration: 0.5, ease: "easeOut" as const },
-  }),
-};
-
-const staggerContainer = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
-};
-
 /* ─── Page ────────────────────────────────────────────────── */
 
 export default function HomePage() {
@@ -142,7 +128,12 @@ export default function HomePage() {
   const [activeCity, setActiveCity] = useState("Varanasi");
 
   useEffect(() => {
-    setActiveCity(localStorage.getItem("selectedCity") || "Varanasi");
+    const syncCity = () => {
+      setActiveCity(localStorage.getItem("selectedCity") || "Varanasi");
+    };
+    syncCity();
+    window.addEventListener("location-changed", syncCity);
+    return () => window.removeEventListener("location-changed", syncCity);
   }, []);
 
   const popularItems = useMemo(() => {
@@ -154,8 +145,8 @@ export default function HomePage() {
       {/* ── Hero ──────────────────────────────────────────── */}
       <section className="relative gradient-hero overflow-hidden">
         {/* Decorative circles */}
-        <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-flame-200/30 blur-3xl" />
-        <div className="pointer-events-none absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-sage-200/20 blur-3xl" />
+        <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-flame-200/20 blur-3xl" />
+        <div className="pointer-events-none absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-sage-200/15 blur-3xl" />
 
         <div className="relative mx-auto flex max-w-7xl flex-col items-center gap-8 px-4 pb-16 pt-20 sm:px-6 lg:flex-row lg:gap-12 lg:px-8 lg:pb-24 lg:pt-28">
           {/* Text */}
@@ -166,7 +157,7 @@ export default function HomePage() {
             className="flex-1 text-center lg:text-left"
           >
             <motion.div custom={0} variants={fadeUp}>
-              <Badge className="mb-4 bg-flame-100 text-flame-700 hover:bg-flame-100 border-flame-200 font-medium px-3 py-1">
+              <Badge className="mb-4 bg-flame-100/80 text-flame-700 hover:bg-flame-100 border-flame-200/60 font-medium px-3 py-1">
                 🔥 Now serving in 7 cities
               </Badge>
             </motion.div>
@@ -174,7 +165,7 @@ export default function HomePage() {
             <motion.h1
               custom={1}
               variants={fadeUp}
-              className="text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl font-[family-name:var(--font-display)]"
+              className="text-4xl font-bold leading-tight tracking-tight text-[var(--color-text-primary)] sm:text-5xl lg:text-6xl font-[family-name:var(--font-display)]"
             >
               Crave it.{" "}
               <span className="text-flame-500">Order it.</span>
@@ -185,7 +176,7 @@ export default function HomePage() {
             <motion.p
               custom={2}
               variants={fadeUp}
-              className="mt-5 max-w-lg text-base text-muted-foreground sm:text-lg mx-auto lg:mx-0"
+              className="mt-5 max-w-lg text-base text-[var(--color-text-secondary)] sm:text-lg mx-auto lg:mx-0"
             >
               From crispy samosas to loaded burgers — your favorite street food
               and fast bites, delivered fresh and fast to your doorstep.
@@ -209,7 +200,7 @@ export default function HomePage() {
               <Button
                 variant="outline"
                 size="lg"
-                className="h-12 rounded-xl text-base border-border"
+                className="h-12 rounded-xl text-base"
                 asChild
               >
                 <Link href="/about">Our Story</Link>
@@ -220,15 +211,15 @@ export default function HomePage() {
             <motion.div
               custom={4}
               variants={fadeUp}
-              className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground lg:justify-start"
+              className="mt-8 flex items-center justify-center gap-6 text-sm text-[var(--color-text-secondary)] lg:justify-start"
             >
               <div className="flex items-center gap-1.5">
                 <Star size={16} className="text-amber-500 fill-amber-500" />
                 <span className="font-medium">4.8 Rating</span>
               </div>
-              <div className="h-4 w-px bg-border" />
+              <div className="h-4 w-px bg-[var(--color-border-val)]" />
               <span>2,500+ Orders</span>
-              <div className="h-4 w-px bg-border" />
+              <div className="h-4 w-px bg-[var(--color-border-val)]" />
               <span>30 min avg.</span>
             </motion.div>
           </motion.div>
@@ -242,8 +233,8 @@ export default function HomePage() {
           >
             <div className="relative aspect-square w-full">
               {/* Glow behind image */}
-              <div className="absolute inset-4 rounded-full bg-flame-400/20 blur-3xl" />
-              <div className="relative z-10 w-full h-full overflow-hidden rounded-[15px] border border-flame-100 bg-white/40 backdrop-blur-md shadow-lg group">
+              <div className="absolute inset-4 rounded-full bg-flame-400/15 blur-3xl" />
+              <div className="relative z-10 w-full h-full overflow-hidden rounded-[15px] border border-[var(--color-border-val)] bg-[var(--color-glass)] backdrop-blur-md shadow-[var(--shadow-level-3)] group">
                 <Image
                   src="/images/chef-burger.png"
                   alt="Delicious burger with fresh ingredients"
@@ -259,7 +250,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Categories ────────────────────────────────────── */}
-      <section className="py-16 sm:py-20">
+      <section className="py-16 sm:py-20 bg-[var(--color-bg)]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -278,7 +269,7 @@ export default function HomePage() {
             <motion.h2
               custom={1}
               variants={fadeUp}
-              className="mt-2 text-3xl font-bold tracking-tight font-[family-name:var(--font-display)] sm:text-4xl"
+              className="mt-2 text-3xl font-bold tracking-tight font-[family-name:var(--font-display)] text-[var(--color-text-primary)] sm:text-4xl"
             >
               Browse by Category
             </motion.h2>
@@ -297,7 +288,7 @@ export default function HomePage() {
                   href={`/menu?category=${cat.slug}`}
                   className="group flex flex-col items-center gap-3"
                 >
-                  <div className="relative h-20 w-20 overflow-hidden rounded-2xl bg-cream-100 transition-all group-hover:shadow-lg group-hover:shadow-flame-500/10 group-hover:scale-105 sm:h-24 sm:w-24">
+                  <div className="relative h-20 w-20 overflow-hidden rounded-2xl bg-[var(--color-surface)] transition-all group-hover:shadow-[var(--shadow-hover)] group-hover:scale-105 sm:h-24 sm:w-24">
                     <Image
                       src={cat.image}
                       alt={cat.name}
@@ -306,7 +297,7 @@ export default function HomePage() {
                       sizes="96px"
                     />
                   </div>
-                  <span className="text-xs font-medium text-foreground sm:text-sm">
+                  <span className="text-xs font-medium text-[var(--color-text-primary)] sm:text-sm">
                     {cat.name}
                   </span>
                 </Link>
@@ -317,7 +308,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Popular Items ─────────────────────────────────── */}
-      <section className="bg-white py-16 sm:py-20">
+      <section className="bg-[var(--color-surface-elevated)] py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -337,7 +328,7 @@ export default function HomePage() {
               <motion.h2
                 custom={1}
                 variants={fadeUp}
-                className="mt-2 text-3xl font-bold tracking-tight font-[family-name:var(--font-display)] sm:text-4xl"
+                className="mt-2 text-3xl font-bold tracking-tight font-[family-name:var(--font-display)] text-[var(--color-text-primary)] sm:text-4xl"
               >
                 Popular Right Now
               </motion.h2>
@@ -345,7 +336,7 @@ export default function HomePage() {
             <motion.div custom={2} variants={fadeUp}>
               <Button
                 variant="outline"
-                className="hidden sm:flex border-border"
+                className="hidden sm:flex"
                 asChild
               >
                 <Link href="/menu">
@@ -365,20 +356,20 @@ export default function HomePage() {
           >
             {itemsLoading ? (
               Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="border border-border/50 rounded-2xl p-4 bg-white space-y-4 animate-pulse">
-                  <div className="h-44 w-full bg-cream-100 rounded-xl" />
-                  <div className="h-6 w-3/4 bg-cream-100 rounded" />
-                  <div className="h-4 w-full bg-cream-100 rounded" />
+                <div key={i} className="border border-[var(--color-border-val)]/50 rounded-2xl p-4 bg-[var(--color-card-bg)] space-y-4 animate-pulse">
+                  <div className="h-44 w-full bg-[var(--color-skeleton)] rounded-xl" />
+                  <div className="h-6 w-3/4 bg-[var(--color-skeleton)] rounded" />
+                  <div className="h-4 w-full bg-[var(--color-skeleton)] rounded" />
                   <div className="flex justify-between items-center">
-                    <div className="h-6 w-1/4 bg-cream-100/50 rounded" />
-                    <div className="h-9 w-1/3 bg-cream-100/50 rounded-xl" />
+                    <div className="h-6 w-1/4 bg-[var(--color-skeleton)] rounded" />
+                    <div className="h-9 w-1/3 bg-[var(--color-skeleton)] rounded-xl" />
                   </div>
                 </div>
               ))
             ) : (
               popularItems.map((item, i) => (
                 <motion.div key={item._id} custom={i} variants={fadeUp}>
-                  <MenuCard item={item as any} selectedCity={activeCity} />
+                  <MenuCard item={item} selectedCity={activeCity} />
                 </motion.div>
               ))
             )}
@@ -386,7 +377,7 @@ export default function HomePage() {
 
           {/* Mobile CTA */}
           <div className="mt-8 text-center sm:hidden">
-            <Button variant="outline" className="border-border" asChild>
+            <Button variant="outline" asChild>
               <Link href="/menu">
                 View Full Menu
                 <ArrowRight size={16} className="ml-1.5" />
@@ -397,7 +388,7 @@ export default function HomePage() {
       </section>
 
       {/* ── Value Propositions ────────────────────────────── */}
-      <section className="py-16 sm:py-20">
+      <section className="py-16 sm:py-20 bg-[var(--color-bg)]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -415,13 +406,13 @@ export default function HomePage() {
                   variants={fadeUp}
                   className="group text-center flex flex-col items-center"
                 >
-                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-flame-50/80 border border-flame-100/60 shadow-xs transition-transform duration-300 group-hover:scale-105">
+                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-flame-50/60 border border-flame-100/40 shadow-[var(--shadow-level-1)] transition-transform duration-300 group-hover:scale-105">
                     <Icon className="h-7 w-7 text-flame-500" strokeWidth={2} />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">
+                  <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
                     {prop.title}
                   </h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
+                  <p className="mt-2 text-sm text-[var(--color-text-secondary)] leading-relaxed max-w-xs mx-auto">
                     {prop.description}
                   </p>
                 </motion.div>
@@ -432,7 +423,7 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA Banner ────────────────────────────────────── */}
-      <section className="bg-[#1a1a1a] py-16 sm:py-20">
+      <section className="bg-[var(--color-surface)] py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -442,7 +433,7 @@ export default function HomePage() {
             className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-flame-500 to-flame-700 p-8 sm:p-12 lg:p-16"
           >
             {/* Decorative */}
-            <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
+            <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[var(--color-card-bg)]/10 blur-2xl" />
             <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-black/10 blur-2xl" />
 
             <div className="relative z-10 flex flex-col items-center gap-6 text-center lg:flex-row lg:text-left lg:justify-between">
@@ -467,7 +458,7 @@ export default function HomePage() {
               <motion.div custom={2} variants={fadeUp} className="shrink-0">
                 <Button
                   size="lg"
-                  className="bg-white text-flame-600 hover:bg-cream-100 h-12 px-8 rounded-xl text-base font-semibold shadow-lg"
+                  className="bg-[var(--color-card-bg)] text-flame-600 hover:bg-[var(--color-card-bg)]/90 h-12 px-8 rounded-xl text-base font-semibold shadow-lg"
                   asChild
                 >
                   <Link href="/menu">

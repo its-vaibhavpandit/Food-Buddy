@@ -44,7 +44,7 @@ export function CartSheet() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative text-muted-foreground hover:text-foreground hover:bg-cream-100/40 rounded-xl"
+          className="relative text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)]/40 rounded-xl"
           aria-label={`Open mini-cart with ${cartItemCount} items`}
         >
           <ShoppingCart size={20} />
@@ -58,13 +58,13 @@ export function CartSheet() {
         </Button>
       </SheetTrigger>
       
-      <SheetContent className="w-full sm:max-w-md flex flex-col p-0 border-l border-border bg-white rounded-l-3xl">
-        <SheetHeader className="px-6 pt-6 pb-4 border-b border-border/60">
+      <SheetContent className="w-full sm:max-w-md flex flex-col p-0 border-l border-[var(--color-border-val)] bg-[var(--color-card-bg)] rounded-l-3xl">
+        <SheetHeader className="px-6 pt-6 pb-4 border-b border-[var(--color-border-val)]/60">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-flame-50 text-flame-500">
               <ShoppingCart size={18} variant="Bold" />
             </div>
-            <SheetTitle className="font-bold text-lg text-foreground font-[family-name:var(--font-display)]">
+            <SheetTitle className="font-bold text-lg text-[var(--color-text-primary)] font-[family-name:var(--font-display)]">
               Your Order
             </SheetTitle>
             {cartItemCount > 0 && (
@@ -73,7 +73,7 @@ export function CartSheet() {
               </Badge>
             )}
           </div>
-          <SheetDescription className="text-xs text-muted-foreground">
+          <SheetDescription className="text-xs text-[var(--color-text-secondary)]">
             Review your dishes and proceed to get them delivered hot.
           </SheetDescription>
         </SheetHeader>
@@ -81,11 +81,11 @@ export function CartSheet() {
         {/* Guest View */}
         {!isAuthenticated ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-cream-50 text-cream-600">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg)] text-cream-600">
               <ShoppingCart size={32} />
             </div>
-            <h4 className="text-base font-semibold text-foreground">Login Required</h4>
-            <p className="text-xs text-muted-foreground max-w-[240px] leading-relaxed">
+            <h4 className="text-base font-semibold text-[var(--color-text-primary)]">Login Required</h4>
+            <p className="text-xs text-[var(--color-text-secondary)] max-w-[240px] leading-relaxed">
               Please sign in to your Fast Food Buddy account to build your cart and place orders.
             </p>
             <Button
@@ -104,11 +104,11 @@ export function CartSheet() {
         ) : !cart || cart.items.length === 0 ? (
           // Empty View
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-cream-50 text-cream-400">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg)] text-cream-400">
               <ShoppingCart size={32} />
             </div>
-            <h4 className="text-base font-semibold text-foreground">Your cart is empty</h4>
-            <p className="text-xs text-muted-foreground max-w-[200px] leading-relaxed">
+            <h4 className="text-base font-semibold text-[var(--color-text-primary)]">Your cart is empty</h4>
+            <p className="text-xs text-[var(--color-text-secondary)] max-w-[200px] leading-relaxed">
               Looks like you haven&apos;t added any delicious food items yet.
             </p>
             <Button
@@ -133,13 +133,13 @@ export function CartSheet() {
 
         {/* Footer summary */}
         {isAuthenticated && cart && cart.items.length > 0 && (
-          <div className="p-6 border-t border-border/60 bg-cream-50/20 space-y-4">
+          <div className="p-6 border-t border-[var(--color-border-val)]/60 bg-[var(--color-bg)] space-y-4">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-semibold text-foreground">{formattedSubtotal}</span>
+                <span className="text-[var(--color-text-secondary)]">Subtotal</span>
+                <span className="font-semibold text-[var(--color-text-primary)]">{formattedSubtotal}</span>
               </div>
-              <p className="text-[10px] text-muted-foreground leading-normal">
+              <p className="text-[10px] text-[var(--color-text-secondary)] leading-normal">
                 Taxes, discounts, and delivery partner fees calculated during checkout.
               </p>
             </div>
@@ -147,7 +147,7 @@ export function CartSheet() {
             <div className="grid grid-cols-2 gap-3">
               <Button
                 variant="outline"
-                className="rounded-xl py-5 border-border hover:bg-cream-50 hover:text-foreground text-xs font-semibold"
+                className="rounded-xl py-5 border-[var(--color-border-val)] hover:bg-[var(--color-bg)] hover:text-[var(--color-text-primary)] text-xs font-semibold"
                 asChild
                 onClick={() => setOpen(false)}
               >

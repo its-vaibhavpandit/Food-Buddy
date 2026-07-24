@@ -54,9 +54,9 @@ export function MenuCard({ item, onAddToCart, selectedCity }: MenuCardProps) {
   };
 
   return (
-    <Card className="group relative overflow-hidden border-border/50 bg-white transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 duration-500 rounded-2xl">
+    <Card className="group relative overflow-hidden border-[var(--color-border-val)]/60 bg-[var(--color-card-bg)] transition-all hover:shadow-[var(--shadow-hover)] hover:-translate-y-1 duration-500 rounded-2xl">
       {/* Image Container */}
-      <div className="relative h-48 overflow-hidden bg-muted/30">
+      <div className="relative h-48 overflow-hidden bg-[var(--color-skeleton)]">
         <Image
           src={item.image}
           alt={item.name}
@@ -84,19 +84,19 @@ export function MenuCard({ item, onAddToCart, selectedCity }: MenuCardProps) {
       {/* Content */}
       <div className="p-5">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-foreground text-base group-hover:text-flame-500 transition-colors line-clamp-1">
+          <h3 className="font-semibold text-[var(--color-text-primary)] text-base group-hover:text-flame-500 transition-colors line-clamp-1">
             {item.name}
           </h3>
         </div>
 
-        <p className="mt-1.5 text-xs text-muted-foreground line-clamp-2 min-h-[32px]">
+        <p className="mt-1.5 text-xs text-[var(--color-text-secondary)] line-clamp-2 min-h-[32px]">
           {item.description}
         </p>
 
         {/* Nutritional Information Tracker */}
         {item.nutrition && (
-          <div className="mt-3.5 pt-3 border-t border-dashed border-border/60 flex items-center justify-between gap-1 text-[10px] text-muted-foreground bg-cream-50/30 px-2 py-1.5 rounded-lg">
-            <span className="font-medium text-foreground">{item.nutrition.calories} kCal</span>
+          <div className="mt-3.5 pt-3 border-t border-dashed border-[var(--color-border-val)]/60 flex items-center justify-between gap-1 text-[10px] text-[var(--color-text-muted)] bg-[var(--color-surface)]/40 px-2 py-1.5 rounded-lg">
+            <span className="font-medium text-[var(--color-text-primary)]">{item.nutrition.calories} kCal</span>
             <span>•</span>
             <span>P: {item.nutrition.protein}g</span>
             <span>•</span>
@@ -112,7 +112,7 @@ export function MenuCard({ item, onAddToCart, selectedCity }: MenuCardProps) {
           </span>
 
           {quantity > 0 ? (
-            <div className="flex items-center border border-border/80 rounded-xl bg-cream-50/20 h-9">
+            <div className="flex items-center border border-[var(--color-border-val)] rounded-xl bg-[var(--color-surface)]/30 h-9">
               <Button
                 variant="ghost"
                 size="icon"
@@ -120,9 +120,9 @@ export function MenuCard({ item, onAddToCart, selectedCity }: MenuCardProps) {
                 onClick={handleDecrement}
                 disabled={updateCartItemMutation.isPending || removeFromCartMutation.isPending}
               >
-                <Minus size={12} className="text-muted-foreground" />
+                <Minus size={12} className="text-[var(--color-text-secondary)]" />
               </Button>
-              <span className="w-8 text-center text-xs font-semibold text-foreground select-none">
+              <span className="w-8 text-center text-xs font-semibold text-[var(--color-text-primary)] select-none">
                 {quantity}
               </span>
               <Button
@@ -132,7 +132,7 @@ export function MenuCard({ item, onAddToCart, selectedCity }: MenuCardProps) {
                 onClick={handleIncrement}
                 disabled={updateCartItemMutation.isPending}
               >
-                <Add size={12} className="text-muted-foreground" />
+                <Add size={12} className="text-[var(--color-text-secondary)]" />
               </Button>
             </div>
           ) : (

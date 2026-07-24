@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { MenuItem } from '../models/menu-item.model.js';
 import { Category } from '../models/category.model.js';
+import { Restaurant } from '../models/restaurant.model.js';
 import { AppError } from '../middleware/error.js';
 import { catchAsync } from '../middleware/async-handler.js';
 
@@ -54,5 +55,25 @@ export const getCategories = catchAsync(async (_req: Request, res: Response) => 
   res.status(200).json({
     status: 'success',
     data: { categories },
+  });
+});
+
+export const getRestaurants = catchAsync(async (req: Request, res: Response) => {
+  const { city, search } = req.query;
+  const filter: Record<string, unknown> = {};
+
+  if (city && typeof city === 'string' && city.trim() && city !== 'all') {
+    filter['address.city'] = new RegExp(escapeRegex(city.trim()), 'i');
+  }
+  if (search && typeof search === 'string' && search.trim()) {
+    const regex = new RegExp(escapeRegex(search.trim()), 'i');
+    filter.$or = [{ name: regex }, { 'address.city': regex }, { cuisine: regex }];
+  }
+
+  const restaurants = await Restaurant.find(filter).populate('owner', 'name email').sort('-rating').lean();
+
+  res.status(200).json({
+    status: 'success',
+    data: { restaurants },
   });
 });

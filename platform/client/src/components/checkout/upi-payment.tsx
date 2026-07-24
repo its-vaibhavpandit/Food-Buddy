@@ -98,7 +98,7 @@ export function UpiPayment({
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
-        className="relative w-full max-w-md bg-white border border-border/80 shadow-2xl rounded-3xl overflow-hidden flex flex-col"
+        className="relative w-full max-w-md bg-[var(--color-card-bg)] border border-[var(--color-border-val)]/80 shadow-2xl rounded-3xl overflow-hidden flex flex-col"
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-[#111827] to-[#1f2937] p-5 text-white flex items-center justify-between">
@@ -129,12 +129,12 @@ export function UpiPayment({
           {step === "scan" && (
             <>
               {/* Amount */}
-              <div className="bg-cream-50/50 p-4 rounded-2xl flex justify-between items-center border border-border/50">
+              <div className="bg-[var(--color-bg)]/50 p-4 rounded-2xl flex justify-between items-center border border-[var(--color-border-val)]/50">
                 <div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-[var(--color-text-secondary)]">
                     PAY AMOUNT
                   </span>
-                  <p className="text-xl font-black text-foreground mt-0.5">
+                  <p className="text-xl font-black text-[var(--color-text-primary)] mt-0.5">
                     {formatPrice(amount)}
                   </p>
                 </div>
@@ -145,21 +145,21 @@ export function UpiPayment({
 
               {/* QR Code */}
               <div className="flex flex-col items-center">
-                <Card className="p-4 bg-white border-2 border-flame-100 rounded-2xl shadow-lg shadow-flame-500/5">
+                <Card className="p-4 bg-[var(--color-card-bg)] border-2 border-flame-100 rounded-2xl shadow-lg shadow-flame-500/5">
                   <canvas ref={canvasRef} className="w-[280px] h-[280px]" />
                 </Card>
-                <p className="text-[10px] text-muted-foreground mt-3 text-center">
+                <p className="text-[10px] text-[var(--color-text-secondary)] mt-3 text-center">
                   Scan with any UPI app (Google Pay, PhonePe, Paytm, etc.)
                 </p>
               </div>
 
               {/* UPI ID */}
-              <div className="flex items-center gap-2 bg-cream-50/50 p-3 rounded-xl border border-border/50">
+              <div className="flex items-center gap-2 bg-[var(--color-bg)]/50 p-3 rounded-xl border border-[var(--color-border-val)]/50">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-muted-foreground font-semibold uppercase">
+                  <p className="text-[10px] text-[var(--color-text-secondary)] font-semibold uppercase">
                     UPI ID
                   </p>
-                  <p className="text-sm font-bold text-foreground truncate">{upiId}</p>
+                  <p className="text-sm font-bold text-[var(--color-text-primary)] truncate">{upiId}</p>
                 </div>
                 <Button
                   variant="outline"
@@ -174,11 +174,11 @@ export function UpiPayment({
 
               {/* Steps */}
               <div className="space-y-2.5">
-                <h4 className="text-xs font-bold text-foreground">How to Pay:</h4>
-                <ol className="text-[11px] text-muted-foreground space-y-1.5 list-decimal pl-4">
+                <h4 className="text-xs font-bold text-[var(--color-text-primary)]">How to Pay:</h4>
+                <ol className="text-[11px] text-[var(--color-text-secondary)] space-y-1.5 list-decimal pl-4">
                   <li>Open any UPI app on your phone</li>
                   <li>Scan the QR code above or enter the UPI ID manually</li>
-                  <li>Complete the payment of <strong className="text-foreground">{formatPrice(amount)}</strong></li>
+                  <li>Complete the payment of <strong className="text-[var(--color-text-primary)]">{formatPrice(amount)}</strong></li>
                   <li>Copy the UPI Transaction / Reference ID</li>
                 </ol>
               </div>
@@ -195,14 +195,14 @@ export function UpiPayment({
           {step === "confirm" && (
             <>
               <div className="text-center space-y-2">
-                <h4 className="text-base font-bold text-foreground">Confirm Your Payment</h4>
-                <p className="text-xs text-muted-foreground">
+                <h4 className="text-base font-bold text-[var(--color-text-primary)]">Confirm Your Payment</h4>
+                <p className="text-xs text-[var(--color-text-secondary)]">
                   Enter the UPI Transaction ID / Reference Number from your payment app.
                 </p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase">
+                <label className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase">
                   UPI Transaction / Reference ID
                 </label>
                 <Input
@@ -210,7 +210,7 @@ export function UpiPayment({
                   placeholder="e.g. 426851234567 or UPI ref number"
                   value={transactionId}
                   onChange={(e) => setTransactionId(e.target.value)}
-                  className="h-12 border-border rounded-xl focus-visible:ring-flame-500 text-center text-sm font-bold tracking-wider"
+                  className="h-12 border-[var(--color-border-val)] rounded-xl focus-visible:ring-flame-500 text-center text-sm font-bold tracking-wider"
                   autoFocus
                 />
                 {transactionId.length > 0 && transactionId.length < 6 && (
@@ -249,8 +249,8 @@ export function UpiPayment({
                 <TickCircle size={40} variant="Bold" />
               </motion.div>
               <div>
-                <h4 className="text-base font-extrabold text-foreground">Payment Confirmed!</h4>
-                <p className="text-xs text-muted-foreground mt-1">
+                <h4 className="text-base font-extrabold text-[var(--color-text-primary)]">Payment Confirmed!</h4>
+                <p className="text-xs text-[var(--color-text-secondary)] mt-1">
                   Transaction ID: <strong>{transactionId}</strong>
                   <br />
                   Placing your order...
@@ -265,8 +265,8 @@ export function UpiPayment({
                 <CloseCircle size={40} variant="Bold" />
               </div>
               <div>
-                <h4 className="text-base font-extrabold text-foreground">Payment Timed Out</h4>
-                <p className="text-xs text-muted-foreground mt-1">
+                <h4 className="text-base font-extrabold text-[var(--color-text-primary)]">Payment Timed Out</h4>
+                <p className="text-xs text-[var(--color-text-secondary)] mt-1">
                   The payment window has expired. Please try again.
                 </p>
               </div>

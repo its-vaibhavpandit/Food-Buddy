@@ -14,9 +14,11 @@ const userSchema = new Schema({
   email: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
   phone: { type: String, trim: true },
   password: { type: String, required: true, select: false },
-  role: { type: String, enum: ['customer', 'admin'], default: 'customer' },
+  role: { type: String, enum: ['customer', 'admin', 'restaurant'], default: 'customer' },
   addresses: [addressSchema],
-  refreshTokens: { type: [{ type: String }], select: false }
+  refreshTokens: { type: [{ type: String }], select: false },
+  passwordResetToken: { type: String, select: false },
+  passwordResetExpires: { type: Date, select: false },
 }, {
   timestamps: true
 });

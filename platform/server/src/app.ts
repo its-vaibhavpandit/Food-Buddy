@@ -14,10 +14,37 @@ import menuRoutes from './routes/menu.routes.js';
 import cartRoutes from './routes/cart.routes.js';
 import orderRoutes from './routes/order.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
+import locationRoutes from './routes/location.routes.js';
 
 const app = express();
 
-// Database connection middleware — ensures connection is warm for serverless
+// 1. CORS — mounted at top of middleware chain for preflight OPTIONS support
+const allowedOrigins = [
+  env.CLIENT_URL,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+];
+
+app.use(cors({
+  origin(origin, callback) {
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      (env.NODE_ENV === 'development' &&
+        (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')))
+    ) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+}));
+
+// 2. Database connection middleware — ensures connection is warm
 app.use(async (_req, _res, next) => {
   try {
     await connectDB();
@@ -32,27 +59,6 @@ app.use(helmet());
 
 // Gzip/Brotli compression — reduces payload sizes ~70%
 app.use(compression());
-
-// CORS — production-safe configuration
-const allowedOrigins = [
-  env.CLIENT_URL,
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-];
-
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin) ||
-        (env.NODE_ENV === 'development' && (origin?.startsWith('http://localhost:') || origin?.startsWith('http://127.0.0.1:')))) {
-      callback(null, true);
-    } else {
-      callback(new AppError('Not allowed by CORS', 403));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-}));
 
 // Body parsing with size limits to prevent payload abuse
 app.use(cookieParser());
@@ -76,7 +82,7 @@ app.use(globalLimiter);
 // Stricter rate limiter for auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 30,
+  limit: env.NODE_ENV === 'development' ? 200 : 30,
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: { status: 'error', message: 'Too many auth attempts, please try again after 15 minutes' },
@@ -88,6 +94,8 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/payment', paymentRoutes);
+app.use('/api/location', locationRoutes);
 
 // Health Check
 app.get('/health', (_req, res) => {
@@ -102,13 +110,18 @@ app.all('*path', (req, _res, next) => {
 // Error handling
 app.use(errorHandler);
 
+import { createServer } from 'http';
+import { initSocket } from './config/socket.js';
+
 // Graceful shutdown / Serverless entry
-let server: ReturnType<typeof app.listen> | null = null;
+const httpServer = createServer(app);
+initSocket(httpServer);
+let server: ReturnType<typeof httpServer.listen> | null = null;
 
 if (process.env.VERCEL) {
   // Vercel serverless — no server.listen needed
 } else {
-  server = app.listen(env.PORT, () => {
+  server = httpServer.listen(env.PORT, () => {
     console.log(`🚀 Server running in ${env.NODE_ENV} mode on port ${env.PORT}`);
   });
 }

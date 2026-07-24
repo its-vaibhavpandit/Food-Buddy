@@ -1,9 +1,12 @@
 import mongoose from 'mongoose';
 import { env } from '../config/env.js';
+import { connectDB } from '../config/db.js';
 import { Category } from '../models/category.model.js';
 import { MenuItem } from '../models/menu-item.model.js';
 import { User } from '../models/user.model.js';
+import { Restaurant } from '../models/restaurant.model.js';
 import { slugify } from '../utils/slugify.js';
+import { getFoodImageFromUnsplash } from '../utils/unsplash.js';
 
 const CATEGORIES_DATA = [
   {
@@ -362,7 +365,7 @@ const generateMenuItems = () => {
 const seed = async () => {
   try {
     console.log('🌱 Starting Database Seeding (Admin & 100+ Menu Items)...');
-    await mongoose.connect(env.MONGODB_URI);
+    await connectDB();
     console.log('📡 Connected to MongoDB');
 
     // 1. Seed admin accounts
@@ -370,10 +373,11 @@ const seed = async () => {
     console.log('🧹 Cleaned existing admin users');
 
     const adminAccounts = [
-      { name: 'Admin Gaurav', email: 'admin1@fastfood.com', password: 'AdminPassword123', role: 'admin' },
-      { name: 'Admin Vaibhav', email: 'admin2@fastfood.com', password: 'AdminPassword123', role: 'admin' },
-      { name: 'Admin Amit', email: 'admin3@fastfood.com', password: 'AdminPassword123', role: 'admin' },
-      { name: 'Admin Rahul', email: 'admin4@fastfood.com', password: 'AdminPassword123', role: 'admin' }
+      { name: 'Admin Pritam', email: 'pritam@fastfood.com', password: 'AdminPassword123', role: 'admin' },
+      { name: 'Admin Vaibhav', email: 'vaibhav@fastfood.com', password: 'AdminPassword123', role: 'admin' },
+      { name: 'Admin Abhishek', email: 'abhishek@fastfood.com', password: 'AdminPassword123', role: 'admin' },
+      { name: 'Admin Himanshu', email: 'himanshu@fastfood.com', password: 'AdminPassword123', role: 'admin' },
+      { name: 'Admin Demo', email: 'admin1@fastfood.com', password: 'AdminPassword123', role: 'admin' }
     ];
 
     // Mongoose schema has pre('save') that will hash these passwords automatically!
@@ -387,9 +391,16 @@ const seed = async () => {
     await MenuItem.deleteMany({});
     console.log('🧹 Cleaned existing categories and menu items');
 
-    // 3. Insert Categories
-    const insertedCategories = await Category.insertMany(CATEGORIES_DATA);
-    console.log(`✅ Seeded ${insertedCategories.length} categories`);
+    // 3. Populate Categories with Unsplash URLs
+    const categoriesWithUnsplash = await Promise.all(
+      CATEGORIES_DATA.map(async (cat) => ({
+        ...cat,
+        image: await getFoodImageFromUnsplash(cat.name),
+      }))
+    );
+
+    const insertedCategories = await Category.insertMany(categoriesWithUnsplash);
+    console.log(`✅ Seeded ${insertedCategories.length} categories with Unsplash images!`);
 
     // Map categories slug to _id for fast retrieval
     const categoryMap = insertedCategories.reduce((acc, cat) => {
@@ -399,25 +410,196 @@ const seed = async () => {
 
     // Generate 100+ menu items
     const generatedItems = generateMenuItems();
-    console.log(`🌀 Generated ${generatedItems.length} menu items. Preparing mapping...`);
+    console.log(`🌀 Generated ${generatedItems.length} menu items. Fetching Unsplash images...`);
 
-    // Prepare Menu Items with Category IDs
-    const menuItemsToInsert = generatedItems.map((item) => {
-      const categoryId = categoryMap[item.categorySlug];
-      if (!categoryId) {
-        throw new Error(`Category not found for slug: ${item.categorySlug}`);
-      }
+    // Prepare Menu Items with Category IDs & Unsplash Images
+    const menuItemsToInsert = await Promise.all(
+      generatedItems.map(async (item) => {
+        const categoryId = categoryMap[item.categorySlug];
+        if (!categoryId) {
+          throw new Error(`Category not found for slug: ${item.categorySlug}`);
+        }
 
-      const { categorySlug, ...rest } = item;
-      return {
-        ...rest,
-        category: categoryId
-      };
-    });
+        const unsplashImage = await getFoodImageFromUnsplash(item.name);
+        const { categorySlug, ...rest } = item;
+        return {
+          ...rest,
+          image: unsplashImage,
+          category: categoryId,
+        };
+      })
+    );
 
     // Insert Menu Items
     const insertedMenuItems = await MenuItem.insertMany(menuItemsToInsert);
-    console.log(`✅ Seeded ${insertedMenuItems.length} menu items into database!`);
+    console.log(`✅ Seeded ${insertedMenuItems.length} menu items with Unsplash URLs into database!`);
+
+    // 4. Seed Restaurants & Distribute Admin Ownership
+    await Restaurant.deleteMany({});
+    console.log('🧹 Cleaned existing restaurants');
+
+    const createdAdmins = await User.find({ role: 'admin' });
+    const adminMap = createdAdmins.reduce((acc, u) => {
+      acc[u.email] = u._id;
+      return acc;
+    }, {} as Record<string, mongoose.Types.ObjectId>);
+
+    const RESTAURANTS_DATA = [
+      // 🟢 Pritam's Assigned Outlets (LPU Campus & Delhi + Gurgaon)
+      {
+        name: 'Fast Food Buddy — LPU Campus Express',
+        slug: 'fast-food-buddy-lpu-campus-express',
+        cuisine: ['Fast Food', 'Street Food', 'Shakes', 'Burgers'],
+        rating: 4.9,
+        deliveryTimeMinutes: 15,
+        priceForTwo: 20000,
+        image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80',
+        address: { street: 'Block 38, LPU Campus', city: 'Phagwara', state: 'Punjab', zipCode: '144411' },
+        isOpen: true,
+        owner: adminMap['pritam@fastfood.com'],
+      },
+      {
+        name: 'Fast Food Buddy — Connaught Place Flagship',
+        slug: 'fast-food-buddy-connaught-place-flagship',
+        cuisine: ['Premium Burgers', 'Pizzas', 'Gourmet Street Food'],
+        rating: 4.9,
+        deliveryTimeMinutes: 25,
+        priceForTwo: 40000,
+        image: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=80',
+        address: { street: 'Inner Circle, E-Block, Connaught Place', city: 'Delhi', state: 'Delhi', zipCode: '110001' },
+        isOpen: true,
+        owner: adminMap['pritam@fastfood.com'],
+      },
+      {
+        name: 'Fast Food Buddy — Cyber City Hub',
+        slug: 'fast-food-buddy-cyber-city-hub',
+        cuisine: ['Artisan Burgers', 'Healthy Bowls', 'Cold Brews'],
+        rating: 4.8,
+        deliveryTimeMinutes: 25,
+        priceForTwo: 45000,
+        image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&auto=format&fit=crop&q=80',
+        address: { street: 'DLF Cyber City, Phase 2', city: 'Gurgaon', state: 'Haryana', zipCode: '122002' },
+        isOpen: true,
+        owner: adminMap['pritam@fastfood.com'],
+      },
+
+      // 🔵 Vaibhav's Assigned Outlets
+      {
+        name: 'Fast Food Buddy — Model Town Central',
+        slug: 'fast-food-buddy-model-town-central',
+        cuisine: ['North Indian', 'Chinese', 'Fast Food'],
+        rating: 4.8,
+        deliveryTimeMinutes: 20,
+        priceForTwo: 25000,
+        image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
+        address: { street: 'Model Town Main Market', city: 'Jalandhar', state: 'Punjab', zipCode: '144003' },
+        isOpen: true,
+        owner: adminMap['vaibhav@fastfood.com'],
+      },
+      {
+        name: 'Fast Food Buddy — Sector 17 Plaza',
+        slug: 'fast-food-buddy-sector-17-plaza',
+        cuisine: ['Loaded Fries', 'Shakes', 'Continental Snacks'],
+        rating: 4.8,
+        deliveryTimeMinutes: 20,
+        priceForTwo: 30000,
+        image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=800&auto=format&fit=crop&q=80',
+        address: { street: 'Main Commercial Plaza, Sector 17C', city: 'Chandigarh', state: 'Chandigarh', zipCode: '160017' },
+        isOpen: true,
+        owner: adminMap['vaibhav@fastfood.com'],
+      },
+      {
+        name: 'Fast Food Buddy — Civil Lines Bistro',
+        slug: 'fast-food-buddy-civil-lines-bistro',
+        cuisine: ['North Indian', 'Street Snacks', 'Shakes'],
+        rating: 4.8,
+        deliveryTimeMinutes: 20,
+        priceForTwo: 25000,
+        image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&auto=format&fit=crop&q=80',
+        address: { street: 'Tashkent Marg, Civil Lines', city: 'Prayagraj', state: 'Uttar Pradesh', zipCode: '211001' },
+        isOpen: true,
+        owner: adminMap['vaibhav@fastfood.com'],
+      },
+
+      // 🟣 Abhishek's Assigned Outlets
+      {
+        name: 'Fast Food Buddy — Hazratganj Royal Lounge',
+        slug: 'fast-food-buddy-hazratganj-royal-lounge',
+        cuisine: ['Mughlai Rolls', 'Kebabs', 'Fast Bites'],
+        rating: 4.8,
+        deliveryTimeMinutes: 25,
+        priceForTwo: 35000,
+        image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
+        address: { street: 'MG Marg, Hazratganj', city: 'Lucknow', state: 'Uttar Pradesh', zipCode: '226001' },
+        isOpen: true,
+        owner: adminMap['abhishek@fastfood.com'],
+      },
+      {
+        name: 'Fast Food Buddy — Station Road Hub',
+        slug: 'fast-food-buddy-station-road-hub',
+        cuisine: ['Samosa', 'Chaat', 'Chowmein', 'Rolls'],
+        rating: 4.7,
+        deliveryTimeMinutes: 15,
+        priceForTwo: 18000,
+        image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&auto=format&fit=crop&q=80',
+        address: { street: 'Station Road, Near Tanki Ghat', city: 'Ghazipur', state: 'Uttar Pradesh', zipCode: '233001' },
+        isOpen: true,
+        owner: adminMap['abhishek@fastfood.com'],
+      },
+      {
+        name: 'Fast Food Buddy — Bandra West Studio',
+        slug: 'fast-food-buddy-bandra-west-studio',
+        cuisine: ['Gourmet Sliders', 'Craft Pizzas', 'Thick Shakes'],
+        rating: 4.9,
+        deliveryTimeMinutes: 30,
+        priceForTwo: 50000,
+        image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&auto=format&fit=crop&q=80',
+        address: { street: 'Hill Road, Bandra West', city: 'Mumbai', state: 'Maharashtra', zipCode: '400050' },
+        isOpen: true,
+        owner: adminMap['abhishek@fastfood.com'],
+      },
+
+      // 🟠 Himanshu's Assigned Outlets
+      {
+        name: 'Fast Food Buddy — BHU Lanka Junction',
+        slug: 'fast-food-buddy-bhu-lanka-junction',
+        cuisine: ['Street Food', 'Biryani', 'Momos', 'Beverages'],
+        rating: 4.9,
+        deliveryTimeMinutes: 20,
+        priceForTwo: 22000,
+        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&auto=format&fit=crop&q=80',
+        address: { street: 'Opp. BHU Gate, Lanka', city: 'Varanasi', state: 'Uttar Pradesh', zipCode: '221005' },
+        isOpen: true,
+        owner: adminMap['himanshu@fastfood.com'],
+      },
+      {
+        name: 'Fast Food Buddy — Sector 18 Express',
+        slug: 'fast-food-buddy-sector-18-express',
+        cuisine: ['Indo-Chinese', 'Pasta', 'Wraps'],
+        rating: 4.7,
+        deliveryTimeMinutes: 20,
+        priceForTwo: 28000,
+        image: 'https://images.unsplash.com/photo-1576107232684-1279f390859f?w=800&auto=format&fit=crop&q=80',
+        address: { street: 'Near Atta Market, Sector 18', city: 'Noida', state: 'Uttar Pradesh', zipCode: '201301' },
+        isOpen: true,
+        owner: adminMap['himanshu@fastfood.com'],
+      },
+      {
+        name: 'Fast Food Buddy — Indiranagar Hub',
+        slug: 'fast-food-buddy-indiranagar-hub',
+        cuisine: ['Gourmet Burgers', 'Craft Shakes', 'Finger Foods'],
+        rating: 4.8,
+        deliveryTimeMinutes: 25,
+        priceForTwo: 42000,
+        image: 'https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?w=800&auto=format&fit=crop&q=80',
+        address: { street: '100 Feet Road, Indiranagar', city: 'Bangalore', state: 'Karnataka', zipCode: '560038' },
+        isOpen: true,
+        owner: adminMap['himanshu@fastfood.com'],
+      },
+    ];
+
+    const insertedRestaurants = await Restaurant.insertMany(RESTAURANTS_DATA);
+    console.log(`✅ Seeded ${insertedRestaurants.length} restaurants with distributed admin owners!`);
 
     console.log('🎉 Seeding completed successfully!');
     process.exit(0);

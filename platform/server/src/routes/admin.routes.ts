@@ -4,6 +4,11 @@ import {
   adminGetOrders,
   adminUpdateOrderStatus,
   adminGetUsers,
+  adminGetRestaurants,
+  adminCreateRestaurant,
+  adminUpdateRestaurant,
+  adminDeleteRestaurant,
+  adminGetTransactions,
   adminCreateMenuItem,
   adminUpdateMenuItem,
   adminDeleteMenuItem,
@@ -31,6 +36,16 @@ router.route('/orders')
 
 router.route('/orders/:id')
   .patch(validate(updateOrderStatusSchema), adminUpdateOrderStatus as unknown as RequestHandler);
+
+router.route('/restaurants')
+  .get(adminGetRestaurants as unknown as RequestHandler)
+  .post(adminCreateRestaurant as unknown as RequestHandler);
+
+router.route('/restaurants/:id')
+  .patch(adminUpdateRestaurant as unknown as RequestHandler)
+  .delete(adminDeleteRestaurant as unknown as RequestHandler);
+
+router.get('/transactions', adminGetTransactions as unknown as RequestHandler);
 
 router.route('/menu')
   .post(validate(createMenuItemSchema), adminCreateMenuItem as unknown as RequestHandler);

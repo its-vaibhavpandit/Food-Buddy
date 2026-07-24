@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { AuthProvider } from "@/providers/auth-provider";
+import { ThemeProvider, ThemeScript } from "@/providers/theme-provider";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { AiAssistantWrapper } from "@/components/shared/ai-assistant-wrapper";
@@ -119,7 +120,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body className="min-h-screen flex flex-col">
         <script
           type="application/ld+json"
@@ -127,12 +131,14 @@ export default function RootLayout({
         />
         <QueryProvider>
           <AuthProvider>
-            <Navbar />
-            <PageTransition>
-              <main className="flex-1 flex flex-col">{children}</main>
-            </PageTransition>
-            <Footer />
-            <AiAssistantWrapper />
+            <ThemeProvider>
+              <Navbar />
+              <PageTransition>
+                <main className="flex-1 flex flex-col">{children}</main>
+              </PageTransition>
+              <Footer />
+              <AiAssistantWrapper />
+            </ThemeProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

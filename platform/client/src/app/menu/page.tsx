@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
+import { staggerContainer, staggerItem } from "@/lib/motion";
 
 function MenuContent() {
   const searchParams = useSearchParams();
@@ -24,7 +25,12 @@ function MenuContent() {
   const [activeCity, setActiveCity] = useState("Varanasi");
   
   useEffect(() => {
-    setActiveCity(localStorage.getItem("selectedCity") || "Varanasi");
+    const syncCity = () => {
+      setActiveCity(localStorage.getItem("selectedCity") || "Varanasi");
+    };
+    syncCity();
+    window.addEventListener("location-changed", syncCity);
+    return () => window.removeEventListener("location-changed", syncCity);
   }, []);
 
   useEffect(() => {
@@ -55,13 +61,13 @@ function MenuContent() {
     : [];
 
   return (
-    <div className="bg-cream-50/30 min-h-screen pb-16">
+    <div className="bg-[var(--color-bg)] min-h-screen pb-16">
       <PageHeader title="Our Delicious Menu" description="Order your favorite street food and trace your orders." />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8">
         {/* Category horizontal scrolling bar */}
         <div className="mb-8">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)] mb-3">
             Select Category
           </h2>
           <div className="flex items-center gap-3 overflow-x-auto pb-3 scrollbar-none">
@@ -69,7 +75,7 @@ function MenuContent() {
               variant={category === "" ? "default" : "outline"}
               onClick={() => setCategory("")}
               className={`rounded-xl h-10 px-5 shrink-0 ${
-                category === "" ? "bg-flame-500 hover:bg-flame-600 text-white border-0" : "border-border text-foreground hover:bg-cream-100/60"
+                category === "" ? "bg-flame-500 hover:bg-flame-600 text-white border-0" : ""
               }`}
             >
               All Items
@@ -86,7 +92,7 @@ function MenuContent() {
                     className={`rounded-xl h-10 px-5 shrink-0 transition-all ${
                       category === cat.slug
                         ? "bg-flame-500 hover:bg-flame-600 text-white border-0 shadow-md shadow-flame-500/10"
-                        : "border-border text-foreground hover:bg-cream-100/60"
+                        : ""
                     }`}
                   >
                     {cat.name}
@@ -96,19 +102,19 @@ function MenuContent() {
         </div>
 
         {/* Filters and Search toolbar */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white p-4 rounded-2xl border border-border/60 shadow-sm mb-8">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[var(--color-card-bg)] p-4 rounded-2xl border border-[var(--color-border-val)]/60 shadow-[var(--shadow-level-1)] mb-8">
           {/* Search Input */}
           <div className="relative flex-1 max-w-md">
             <SearchNormal1
               size={18}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
             />
             <Input
               type="text"
               placeholder="Search dishes, snacks..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-11 h-11 border-border rounded-xl focus-visible:ring-flame-500"
+              className="pl-11 h-11 rounded-xl"
             />
           </div>
 
@@ -121,12 +127,12 @@ function MenuContent() {
               className={`h-11 rounded-xl px-4 text-xs font-semibold ${
                 vegOnly
                   ? "bg-emerald-600 hover:bg-emerald-700 text-white border-0"
-                  : "border-border text-foreground hover:bg-cream-100/60"
+                  : ""
               }`}
             >
               <div
                 className={`w-3 h-3 border rounded-[3px] flex items-center justify-center mr-2 ${
-                  vegOnly ? "bg-white border-emerald-700" : "bg-transparent border-muted-foreground"
+                  vegOnly ? "bg-[var(--color-card-bg)] border-emerald-700" : "bg-transparent border-[var(--color-text-muted)]"
                 }`}
               >
                 {vegOnly && <div className="w-1.5 h-1.5 bg-emerald-600 rounded-sm" />}
@@ -139,7 +145,7 @@ function MenuContent() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="h-11 border border-border rounded-xl px-4 pr-8 text-xs font-semibold bg-white text-foreground cursor-pointer focus:outline-none appearance-none hover:bg-cream-100/60"
+                className="h-11 border border-[var(--color-border-val)] rounded-xl px-4 pr-8 text-xs font-semibold bg-[var(--color-card-bg)] text-[var(--color-text-primary)] cursor-pointer focus:outline-none appearance-none hover:bg-[var(--color-surface)]"
                 aria-label="Sort dishes"
               >
                 <option value="default">Default Sorting</option>
@@ -149,7 +155,7 @@ function MenuContent() {
               </select>
               <FilterSearch
                 size={14}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none"
               />
             </div>
           </div>
@@ -157,7 +163,7 @@ function MenuContent() {
 
         {/* Famous Food City recommendation display banner */}
         {activeCity && (
-          <div className="bg-flame-50/50 border border-flame-100/60 text-flame-700 rounded-2xl px-5 py-4 flex items-center justify-between mb-8">
+          <div className="bg-flame-50/40 border border-flame-100/50 text-flame-700 rounded-2xl px-5 py-4 flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <div className="bg-flame-500 text-white rounded-xl p-2 font-bold text-sm">
                 ⭐
@@ -175,7 +181,7 @@ function MenuContent() {
         {itemsLoading ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="border border-border/50 rounded-2xl p-4 bg-white space-y-4">
+              <div key={i} className="border border-[var(--color-border-val)]/50 rounded-2xl p-4 bg-[var(--color-card-bg)] space-y-4">
                 <Skeleton className="h-44 w-full rounded-xl" />
                 <Skeleton className="h-6 w-3/4 rounded" />
                 <Skeleton className="h-4 w-full rounded" />
@@ -188,24 +194,15 @@ function MenuContent() {
           </div>
         ) : filteredAndSortedItems.length > 0 ? (
           <motion.div 
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: { staggerChildren: 0.1 }
-              }
-            }}
+            variants={staggerContainer}
             initial="hidden"
-            animate="show"
+            animate="visible"
             className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           >
             {filteredAndSortedItems.map((item) => (
               <motion.div 
                 key={item._id}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
-                }}
+                variants={staggerItem}
               >
                 <MenuCard
                   item={item}
@@ -235,7 +232,7 @@ function MenuContent() {
 export default function MenuPage() {
   return (
     <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-cream-50/20">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg)]">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-flame-200 border-t-flame-500" />
       </div>
     }>

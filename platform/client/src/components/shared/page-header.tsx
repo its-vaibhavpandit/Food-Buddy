@@ -44,7 +44,7 @@ export function PageHeader({
   return (
     <section
       className={cn(
-        "bg-white border-b border-border/60 py-6 sm:py-8 shadow-xs",
+        "bg-[var(--color-surface-elevated)] border-b border-[var(--color-border-val)] py-6 sm:py-8 shadow-[var(--shadow-level-1)]",
         className
       )}
     >
@@ -55,14 +55,14 @@ export function PageHeader({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
         <nav aria-label="Breadcrumb" className="mb-3">
-          <ol className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+          <ol className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] font-medium">
             {breadcrumbs.map((crumb, index) => {
               const isLast = index === breadcrumbs.length - 1;
               return (
                 <li key={crumb.href} className="flex items-center gap-1.5">
-                  {index > 0 && <span className="text-muted-foreground/45">/</span>}
+                  {index > 0 && <span className="text-[var(--color-text-muted)]/45">/</span>}
                   {isLast ? (
-                    <span className="text-foreground font-semibold" aria-current="page">
+                    <span className="text-[var(--color-text-primary)] font-semibold" aria-current="page">
                       {crumb.label}
                     </span>
                   ) : (
@@ -81,11 +81,11 @@ export function PageHeader({
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl font-[family-name:var(--font-display)]">
+            <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)] sm:text-3xl font-[family-name:var(--font-display)]">
               {title}
             </h1>
             {description && (
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
+              <p className="text-xs sm:text-sm text-[var(--color-text-secondary)] max-w-2xl leading-relaxed">
                 {description}
               </p>
             )}

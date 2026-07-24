@@ -26,7 +26,7 @@ export default function ProfilePage() {
 
   if (authLoading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-cream-50/20">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg)]">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-flame-200 border-t-flame-500" />
       </div>
     );
@@ -35,7 +35,7 @@ export default function ProfilePage() {
   const orderCount = orders?.length || 0;
 
   return (
-    <div className="bg-cream-50/30 min-h-screen pb-16">
+    <div className="bg-[var(--color-bg)] min-h-screen pb-16">
       <PageHeader
         title="Your Profile"
         description="Manage your account settings, saved addresses, and active orders."
@@ -46,7 +46,7 @@ export default function ProfilePage() {
           
           {/* Left Sidebar Account Navigation */}
           <div className="md:col-span-1 space-y-6">
-            <Card className="p-6 border-border/50 bg-white rounded-2xl shadow-sm text-center">
+            <Card className="p-6 border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl shadow-sm text-center">
               <div className="relative mx-auto h-20 w-20 overflow-hidden rounded-full border-4 border-flame-100 shadow-md mb-4 bg-flame-50/50">
                 <Image
                   src="/images/avatar.svg"
@@ -57,13 +57,13 @@ export default function ProfilePage() {
                   priority
                 />
               </div>
-              <h2 className="text-lg font-bold text-foreground font-[family-name:var(--font-display)]">
+              <h2 className="text-lg font-bold text-[var(--color-text-primary)] font-[family-name:var(--font-display)]">
                 {user.name}
               </h2>
-              <p className="text-xs text-muted-foreground mt-1 capitalize">{user.role} Member</p>
+              <p className="text-xs text-[var(--color-text-secondary)] mt-1 capitalize">{user.role} Member</p>
               
               <div className="mt-4 flex justify-center gap-1.5">
-                <Badge className="bg-cream-100 text-foreground border border-cream-200 hover:bg-cream-100 text-[10px] px-2 py-0.5">
+                <Badge className="bg-[var(--color-surface)] text-[var(--color-text-primary)] border border-cream-200 hover:bg-[var(--color-surface)] text-[10px] px-2 py-0.5">
                   ⭐ Active
                 </Badge>
                 {user.role === "admin" && (
@@ -78,7 +78,7 @@ export default function ProfilePage() {
               <div className="space-y-2">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-xs font-semibold rounded-xl text-muted-foreground hover:text-foreground h-10 px-3"
+                  className="w-full justify-start text-xs font-semibold rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] h-10 px-3"
                   asChild
                 >
                   <Link href="/orders">
@@ -90,7 +90,7 @@ export default function ProfilePage() {
                 {user.role === "admin" && (
                   <Button
                     variant="ghost"
-                    className="w-full justify-start text-xs font-semibold rounded-xl text-muted-foreground hover:text-foreground h-10 px-3"
+                    className="w-full justify-start text-xs font-semibold rounded-xl text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] h-10 px-3"
                     asChild
                   >
                     <Link href="/admin">
@@ -116,68 +116,68 @@ export default function ProfilePage() {
           <div className="md:col-span-2 space-y-6">
             
             {/* Account Details Card */}
-            <Card className="p-6 border-border/50 bg-white rounded-2xl shadow-sm space-y-6">
-              <h3 className="text-base font-bold font-[family-name:var(--font-display)] text-foreground pb-3 border-b border-border/60">
+            <Card className="p-6 border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl shadow-sm space-y-6">
+              <h3 className="text-base font-bold font-[family-name:var(--font-display)] text-[var(--color-text-primary)] pb-3 border-b border-[var(--color-border-val)]/60">
                 Personal Information
               </h3>
 
               <div className="grid gap-5 sm:grid-cols-2 text-xs">
                 <div className="space-y-1">
-                  <p className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                  <p className="font-semibold text-[var(--color-text-secondary)] uppercase text-[10px] tracking-wider flex items-center gap-1.5">
                     <User size={14} className="text-flame-500" />
                     Full Name
                   </p>
-                  <p className="text-sm font-bold text-foreground pl-5">{user.name}</p>
+                  <p className="text-sm font-bold text-[var(--color-text-primary)] pl-5">{user.name}</p>
                 </div>
 
                 <div className="space-y-1">
-                  <p className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                  <p className="font-semibold text-[var(--color-text-secondary)] uppercase text-[10px] tracking-wider flex items-center gap-1.5">
                     <Sms size={14} className="text-flame-500" />
                     Email Address
                   </p>
-                  <p className="text-sm font-bold text-foreground pl-5">{user.email}</p>
+                  <p className="text-sm font-bold text-[var(--color-text-primary)] pl-5">{user.email}</p>
                 </div>
 
                 <div className="space-y-1">
-                  <p className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                  <p className="font-semibold text-[var(--color-text-secondary)] uppercase text-[10px] tracking-wider flex items-center gap-1.5">
                     <Call size={14} className="text-flame-500" />
                     Mobile Number
                   </p>
-                  <p className="text-sm font-bold text-foreground pl-5">
+                  <p className="text-sm font-bold text-[var(--color-text-primary)] pl-5">
                     {user.phone || "Not provided"}
                   </p>
                 </div>
 
                 <div className="space-y-1">
-                  <p className="font-semibold text-muted-foreground uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                  <p className="font-semibold text-[var(--color-text-secondary)] uppercase text-[10px] tracking-wider flex items-center gap-1.5">
                     <ShieldSecurity size={14} className="text-flame-500" />
                     Access Role
                   </p>
-                  <p className="text-sm font-bold text-foreground pl-5 capitalize">{user.role}</p>
+                  <p className="text-sm font-bold text-[var(--color-text-primary)] pl-5 capitalize">{user.role}</p>
                 </div>
               </div>
             </Card>
 
             {/* Saved Addresses Summary */}
-            <Card className="p-6 border-border/50 bg-white rounded-2xl shadow-sm space-y-6">
-              <h3 className="text-base font-bold font-[family-name:var(--font-display)] text-foreground pb-3 border-b border-border/60">
+            <Card className="p-6 border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl shadow-sm space-y-6">
+              <h3 className="text-base font-bold font-[family-name:var(--font-display)] text-[var(--color-text-primary)] pb-3 border-b border-[var(--color-border-val)]/60">
                 Saved Addresses
               </h3>
 
               {user.addresses && user.addresses.length > 0 ? (
                 <div className="space-y-4 text-xs">
                   {user.addresses.map((address, index) => (
-                    <div key={address._id} className="p-4 border border-border/60 rounded-xl flex justify-between items-start gap-4 hover:bg-cream-50/10">
+                    <div key={address._id} className="p-4 border border-[var(--color-border-val)]/60 rounded-xl flex justify-between items-start gap-4 hover:bg-[var(--color-bg)]/10">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-foreground">Address {index + 1}</span>
+                          <span className="font-bold text-[var(--color-text-primary)]">Address {index + 1}</span>
                           {address.isDefault && (
                             <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-50 text-[9px] px-1.5 py-0.5">
                               Default
                             </Badge>
                           )}
                         </div>
-                        <p className="text-muted-foreground mt-1 text-[11px] leading-relaxed">
+                        <p className="text-[var(--color-text-secondary)] mt-1 text-[11px] leading-relaxed">
                           {address.street}, {address.city}, {address.state} - {address.zipCode}
                         </p>
                       </div>
@@ -186,8 +186,8 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div className="text-center py-6 space-y-2 text-xs">
-                  <p className="text-muted-foreground">No addresses saved to your profile yet.</p>
-                  <p className="text-[10px] text-muted-foreground">Addresses specified during checkout will automatically be visible here.</p>
+                  <p className="text-[var(--color-text-secondary)]">No addresses saved to your profile yet.</p>
+                  <p className="text-[10px] text-[var(--color-text-secondary)]">Addresses specified during checkout will automatically be visible here.</p>
                 </div>
               )}
             </Card>

@@ -36,31 +36,31 @@ export function CartSummary({ cart, isCheckout = false }: CartSummaryProps) {
   };
 
   return (
-    <Card className="p-6 border-border/50 bg-white rounded-2xl shadow-sm space-y-5">
-      <h3 className="text-lg font-bold text-foreground font-[family-name:var(--font-display)]">
+    <Card className="p-6 border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl shadow-sm space-y-5">
+      <h3 className="text-lg font-bold text-[var(--color-text-primary)] font-[family-name:var(--font-display)]">
         Order Summary
       </h3>
 
       <div className="space-y-3.5 text-sm">
         {/* Subtotal */}
-        <div className="flex justify-between text-muted-foreground">
+        <div className="flex justify-between text-[var(--color-text-secondary)]">
           <span>Subtotal</span>
-          <span className="font-medium text-foreground">{formatCurrency(subtotal)}</span>
+          <span className="font-medium text-[var(--color-text-primary)]">{formatCurrency(subtotal)}</span>
         </div>
 
         {/* GST */}
-        <div className="flex justify-between text-muted-foreground">
+        <div className="flex justify-between text-[var(--color-text-secondary)]">
           <span>GST (5%)</span>
-          <span className="font-medium text-foreground">{formatCurrency(tax)}</span>
+          <span className="font-medium text-[var(--color-text-primary)]">{formatCurrency(tax)}</span>
         </div>
 
         {/* Delivery */}
-        <div className="flex justify-between text-muted-foreground">
+        <div className="flex justify-between text-[var(--color-text-secondary)]">
           <span>Delivery Partner Fee</span>
           {deliveryFee === 0 ? (
             <span className="font-semibold text-green-600">FREE</span>
           ) : (
-            <span className="font-medium text-foreground">{formatCurrency(deliveryFee)}</span>
+            <span className="font-medium text-[var(--color-text-primary)]">{formatCurrency(deliveryFee)}</span>
           )}
         </div>
 
@@ -73,7 +73,7 @@ export function CartSummary({ cart, isCheckout = false }: CartSummaryProps) {
         <Separator className="bg-border/60" />
 
         {/* Total */}
-        <div className="flex justify-between text-base font-bold text-foreground pt-1.5">
+        <div className="flex justify-between text-base font-bold text-[var(--color-text-primary)] pt-1.5">
           <span>Grand Total</span>
           <span className="text-flame-600">{formatCurrency(total)}</span>
         </div>
@@ -83,14 +83,14 @@ export function CartSummary({ cart, isCheckout = false }: CartSummaryProps) {
       {!isCheckout && (
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Ticket size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Ticket size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]" />
             <input
               type="text"
               placeholder="Promo Code"
-              className="w-full pl-9 pr-3 py-2 text-xs border border-border/80 rounded-xl bg-cream-50/20 focus:outline-none focus:border-flame-400 font-medium"
+              className="w-full pl-9 pr-3 py-2 text-xs border border-[var(--color-border-val)]/80 rounded-xl bg-[var(--color-bg)] focus:outline-none focus:border-flame-400 font-medium"
             />
           </div>
-          <Button variant="outline" className="text-xs rounded-xl h-9 hover:bg-cream-50 hover:text-foreground">
+          <Button variant="outline" className="text-xs rounded-xl h-9 hover:bg-[var(--color-bg)] hover:text-[var(--color-text-primary)]">
             Apply
           </Button>
         </div>

@@ -7,7 +7,9 @@ import {
   getMe,
   updateProfile,
   addAddress,
-  deleteAddress
+  deleteAddress,
+  forgotPassword,
+  resetPassword,
 } from '../controllers/auth.controller.js';
 import { validate } from '../middleware/validate.js';
 import { authenticate } from '../middleware/auth.js';
@@ -23,6 +25,8 @@ router.post('/register', validate(registerSchema), register);
 router.post('/login', validate(loginSchema), login);
 router.post('/logout', logout);
 router.post('/refresh', refresh);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 // Protected routes — authenticate as RequestHandler for Express 5 compat
 const auth = authenticate as unknown as RequestHandler;

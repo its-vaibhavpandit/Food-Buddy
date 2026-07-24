@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { User } from '../models/user.model.js';
 import { env } from '../config/env.js';
 import { AppError } from '../middleware/error.js';
@@ -40,6 +41,10 @@ const formatUserResponse = (user: any) => ({
 
 const sendTokenResponse = async (user: any, statusCode: number, res: Response) => {
   const { accessToken, refreshToken } = generateTokens(user._id.toString(), user.role);
+
+  if (!Array.isArray(user.refreshTokens)) {
+    user.refreshTokens = [];
+  }
 
   // Cap at 5 active sessions
   if (user.refreshTokens.length >= 5) {
@@ -125,14 +130,18 @@ export const refresh = catchAsync(async (req: Request, res: Response) => {
     throw new AppError('User no longer exists', 401);
   }
 
+  if (!Array.isArray(user.refreshTokens)) {
+    user.refreshTokens = [];
+  }
+
   // Refresh token rotation / reuse detection
   const tokenIndex = user.refreshTokens.indexOf(refreshToken);
   if (tokenIndex === -1) {
-    // Detected reuse — revoke all sessions
+    // Detected reuse or expired session — revoke session & clear cookie
     user.refreshTokens = [];
     await user.save({ validateModifiedOnly: true });
     clearRefreshCookie(res);
-    throw new AppError('Detected reuse of refresh token. All sessions revoked.', 401);
+    throw new AppError('Session expired or refresh token invalid. Please log in.', 401);
   }
 
   // Remove the used refresh token
@@ -226,5 +235,62 @@ export const deleteAddress = catchAsync(async (req: AuthRequest, res: Response) 
   res.status(200).json({
     status: 'success',
     data: { addresses: user.addresses },
+  });
+});
+
+export const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    // Return success message even if email not found to prevent user enumeration
+    res.status(200).json({
+      status: 'success',
+      message: 'If an account exists with that email, a password reset token has been generated.',
+    });
+    return;
+  }
+
+  // Generate 6-digit verification / reset token
+  const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+  const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+  user.passwordResetToken = hashedToken;
+  user.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+  await user.save({ validateModifiedOnly: true });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Password reset token generated (Valid for 10 minutes)',
+    resetToken, // Returned in API response for test environment / UI convenience
+  });
+});
+
+export const resetPassword = catchAsync(async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword || newPassword.length < 6) {
+    throw new AppError('Token and valid new password (min 6 chars) are required', 400);
+  }
+
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: new Date() },
+  }).select('+passwordResetToken +passwordResetExpires');
+
+  if (!user) {
+    throw new AppError('Token is invalid or has expired', 400);
+  }
+
+  user.password = newPassword;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Password reset successfully. You can now log in with your new password.',
   });
 });

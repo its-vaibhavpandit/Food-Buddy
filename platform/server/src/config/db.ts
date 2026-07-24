@@ -1,10 +1,16 @@
 import mongoose from 'mongoose';
+import dns from 'node:dns';
 import { env } from './env.js';
 
-/**
- * Global cache interface to maintain a single cached Mongoose connection
- * across serverless container restarts and concurrent invocations on Vercel.
- */
+try {
+  if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+  }
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch {
+  // Ignore DNS config errors if restricted
+}
+
 interface MongooseCache {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
@@ -17,32 +23,63 @@ if (!cached) {
 }
 
 export const connectDB = async (): Promise<void> => {
-  // 1. If connection already exists and is warm, reuse it instantly
+  // If already connected (readyState 1 = connected)
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+
   if (cached.conn) {
     return;
   }
 
-  // 2. If no connection promise is pending, create one
   if (!cached.promise) {
     const opts = {
-      maxPoolSize: 10,              // Keep connection pool lightweight for serverless
+      maxPoolSize: 10,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
-      bufferCommands: false,         // Disable buffering for immediate error reporting
+      bufferCommands: false,
     };
 
-    console.log('📡 Initializing new cached MongoDB connection pool for serverless...');
-    cached.promise = mongoose.connect(env.MONGODB_URI, opts).then((mongooseInstance) => {
-      console.log('📡 MongoDB Connected successfully (connection cached)');
-      return mongooseInstance;
-    });
+    console.log('📡 Connecting to MongoDB database...');
+
+    cached.promise = (async () => {
+      // 1. Try primary MONGODB_URI (Atlas / Configured)
+      try {
+        const instance = await mongoose.connect(env.MONGODB_URI, opts);
+        console.log('📡 MongoDB Connected successfully (Primary Cluster)');
+        return instance;
+      } catch (primaryErr) {
+        console.warn('⚠️ Primary MongoDB connection failed:', (primaryErr as Error).message);
+        
+        // 2. Try standard srv URI fallback
+        const srvUri = 'mongodb+srv://AgroBirds:%40AgroBirds001@agrobirds.u9tse05.mongodb.net/fastfood-buddy?retryWrites=true&w=majority';
+        try {
+          console.log('📡 Attempting MongoDB Atlas SRV Fallback Connection...');
+          const instance = await mongoose.connect(srvUri, opts);
+          console.log('📡 MongoDB Connected successfully (SRV Fallback)');
+          return instance;
+        } catch (srvErr) {
+          // 3. Try local MongoDB
+          try {
+            console.log('📡 Attempting Local MongoDB Fallback (127.0.0.1:27017)...');
+            const instance = await mongoose.connect('mongodb://127.0.0.1:27017/fastfood-buddy', opts);
+            console.log('📡 MongoDB Connected successfully (Local Database)');
+            return instance;
+          } catch (localErr) {
+            console.error('❌ All MongoDB Connection attempts failed. Ensure MongoDB Atlas IP whitelist includes 0.0.0.0/0');
+            throw primaryErr;
+          }
+        }
+      }
+    })();
   }
 
   try {
     cached.conn = await cached.promise;
   } catch (error) {
-    cached.promise = null; // Reset cached promise on failure to allow retry
-    throw new Error(`MongoDB Connection Error: ${(error as Error).message}`);
+    cached.promise = null;
+    // Don't crash Express middleware; allow endpoints like /api/location to function cleanly
+    console.warn(`⚠️ Database currently offline: ${(error as Error).message}`);
   }
 };
 

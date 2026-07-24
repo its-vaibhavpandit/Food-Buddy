@@ -1,5 +1,3 @@
-import type { Address } from "./user";
-
 export type OrderStatus =
   | "pending"
   | "confirmed"

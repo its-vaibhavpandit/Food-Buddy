@@ -5,20 +5,21 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-semibold whitespace-nowrap transition-all duration-200 outline-none focus-visible:ring-[3px] focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.97] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-semibold whitespace-nowrap transition-all duration-200 outline-none focus-visible:ring-[3px] focus-visible:ring-[var(--color-focus-ring)] disabled:pointer-events-none disabled:opacity-50 active:scale-[0.97] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md hover:-translate-y-0.5",
+        default: "bg-primary text-primary-foreground shadow-[var(--shadow-level-1)] hover:bg-primary/90 hover:shadow-[var(--shadow-level-2)] hover:-translate-y-0.5",
         destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 hover:shadow-md hover:-translate-y-0.5",
+          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 hover:shadow-[var(--shadow-level-2)] hover:-translate-y-0.5",
         outline:
-          "border border-border bg-background shadow-xs hover:bg-muted hover:text-foreground hover:shadow-sm",
+          "border border-[var(--color-border-val)] bg-[var(--color-card-bg)] shadow-[var(--shadow-level-1)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)]",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-[var(--color-surface)] text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]",
         ghost:
-          "hover:bg-muted hover:text-foreground",
+          "hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)]",
         link: "text-primary underline-offset-4 hover:underline",
+        warm: "bg-gradient-to-r from-flame-500 to-flame-600 text-white shadow-[var(--shadow-level-1)] hover:from-flame-600 hover:to-flame-700 hover:shadow-[var(--shadow-level-2)] hover:-translate-y-0.5",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
