@@ -1,0 +1,122 @@
+"use client";
+
+import Image from "next/image";
+import { Trash, Add, Minus } from "iconsax-react";
+import { Button } from "@/components/ui/button";
+import type { CartItem as CartItemType } from "@/types";
+import { useUpdateCartItem, useRemoveFromCart } from "@/hooks/use-cart";
+
+interface CartItemProps {
+  item: CartItemType;
+  isReadOnly?: boolean;
+}
+
+export function CartItem({ item, isReadOnly = false }: CartItemProps) {
+  const updateQty = useUpdateCartItem();
+  const removeItem = useRemoveFromCart();
+
+  const handleIncrement = () => {
+    if (updateQty.isPending) return;
+    updateQty.mutate({
+      menuItemId: item.menuItem._id,
+      quantity: item.quantity + 1,
+    });
+  };
+
+  const handleDecrement = () => {
+    if (updateQty.isPending || item.quantity <= 1) return;
+    updateQty.mutate({
+      menuItemId: item.menuItem._id,
+      quantity: item.quantity - 1,
+    });
+  };
+
+  const handleRemove = () => {
+    if (removeItem.isPending) return;
+    removeItem.mutate(item.menuItem._id);
+  };
+
+  const formattedPrice = (item.menuItem.price / 100).toLocaleString("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2,
+  });
+
+  const formattedItemTotal = ((item.menuItem.price * item.quantity) / 100).toLocaleString("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2,
+  });
+
+  return (
+    <div className="flex gap-4 border-b border-[var(--color-border-val)]/60 py-4 last:border-0 items-center justify-between">
+      {/* Product Image */}
+      <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted border border-[var(--color-border-val)]/40">
+        <Image
+          src={item.menuItem.image}
+          alt={item.menuItem.name}
+          fill
+          className="object-cover"
+        />
+      </div>
+
+      {/* Info */}
+      <div className="flex flex-1 flex-col min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span
+            className={`inline-block h-2 w-2 rounded-full ${
+              item.menuItem.isVeg ? "bg-green-500" : "bg-red-500"
+            }`}
+          />
+          <h4 className="truncate text-sm font-semibold text-[var(--color-text-primary)]">
+            {item.menuItem.name}
+          </h4>
+        </div>
+        <p className="mt-1 text-xs text-[var(--color-text-secondary)]">{formattedPrice} each</p>
+
+        {/* Unified controls (responsive sizing via CSS) */}
+        {!isReadOnly && (
+          <div className="flex items-center gap-2 sm:gap-3 mt-2.5 sm:mt-0">
+            <div className="flex items-center border border-[var(--color-border-val)]/80 rounded-lg bg-[var(--color-bg)]/50">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 sm:h-8 sm:w-8 rounded-none"
+                onClick={handleDecrement}
+                disabled={item.quantity <= 1 || updateQty.isPending}
+              >
+                <Minus size={14} className="text-[var(--color-text-secondary)] scale-75 sm:scale-100" />
+              </Button>
+              <span className="w-8 text-center text-xs font-semibold text-[var(--color-text-primary)]">
+                {item.quantity}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 sm:h-8 sm:w-8 rounded-none"
+                onClick={handleIncrement}
+                disabled={updateQty.isPending}
+              >
+                <Add size={14} className="text-[var(--color-text-secondary)] scale-75 sm:scale-100" />
+              </Button>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 sm:h-8 sm:w-8 text-red-500 hover:text-red-600 hover:bg-red-50/50 rounded-lg"
+              onClick={handleRemove}
+              disabled={removeItem.isPending}
+            >
+              <Trash size={16} variant="Bold" className="scale-75 sm:scale-100" />
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Item Total */}
+      <div className="text-right pl-2">
+        <span className="text-sm font-semibold text-[var(--color-text-primary)]">{formattedItemTotal}</span>
+      </div>
+    </div>
+  );
+}
