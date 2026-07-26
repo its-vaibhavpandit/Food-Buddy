@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fastfoodbuddy.in/sitemap.xml
+
+# Block private routes
+Disallow: /profile
+Disallow: /orders
+Disallow: /admin
+Disallow: /checkout
+Disallow: /cart
