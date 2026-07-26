@@ -52,7 +52,7 @@ export const connectDB = async (): Promise<void> => {
         console.warn('⚠️ Primary MongoDB connection failed:', (primaryErr as Error).message);
         
         // 2. Try standard srv URI fallback
-        const srvUri = 'mongodb+srv://AgroBirds:%40AgroBirds001@agrobirds.u9tse05.mongodb.net/fastfood-buddy?retryWrites=true&w=majority';
+        const srvUri = env.MONGODB_URI;
         try {
           console.log('📡 Attempting MongoDB Atlas SRV Fallback Connection...');
           const instance = await mongoose.connect(srvUri, opts);
