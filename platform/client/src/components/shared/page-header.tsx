@@ -49,6 +49,7 @@ export function PageHeader({
       )}
     >
       <script
+        id="breadcrumb-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
