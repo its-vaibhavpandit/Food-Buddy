@@ -1,114 +1,163 @@
 "use client";
 
-import { useState } from "react";
-import { Shop, Notification, Setting2 } from "iconsax-react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ShoppingCart, ArrowLeft, Trash } from "iconsax-react";
+import { useAuth } from "@/providers/auth-provider";
+import { useCart, useClearCart } from "@/hooks/use-cart";
+import { CartItem } from "@/components/cart/cart-item";
+import { CartSummary } from "@/components/cart/cart-summary";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/shared/page-header";
 
-export default function RestaurantDashboardPage() {
-  const [isOpen, setIsOpen] = useState(true);
+export default function CartPage() {
+  const { isAuthenticated } = useAuth();
+  const { data: cart, isLoading } = useCart(isAuthenticated);
+  const clearCartMutation = useClearCart();
+
+  const handleClearCart = () => {
+    if (clearCartMutation.isPending) return;
+    if (window.confirm("Are you sure you want to clear your cart?")) {
+      clearCartMutation.mutate();
+    }
+  };
+
+  const cartItemCount = cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
   return (
     <div className="bg-[var(--color-bg)] min-h-screen pb-16">
       <PageHeader
-        title="Restaurant Partner Portal"
-        description="Manage live orders, menu stock availability, and outlet settings in real-time."
+        title="Your Cart"
+        description="Review your selected items and customize quantities before checkout."
       />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-8 space-y-8">
-        {/* Restaurant Outlet Header */}
-        <Card className="p-6 bg-[var(--color-card-bg)] border border-[var(--color-border-val)]/60 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="h-14 w-14 bg-flame-100 text-flame-600 rounded-2xl flex items-center justify-center font-bold">
-              <Shop size={32} variant="Bold" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-[var(--color-text-primary)]">Agro Birds Kitchen</h2>
-                <Badge className={isOpen ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"}>
-                  {isOpen ? "ONLINE & ACCEPTING ORDERS" : "OUTLET CLOSED"}
-                </Badge>
-              </div>
-              <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">Varanasi Central • Outlet ID: #RST-8829</p>
-            </div>
-          </div>
-
-          <Button
-            onClick={() => setIsOpen(!isOpen)}
-            className={isOpen ? "bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold" : "bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold"}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-10">
+        {!isAuthenticated ? (
+          /* Guest View */
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
           >
-            {isOpen ? "Pause Taking Orders" : "Open Outlet Now"}
-          </Button>
-        </Card>
-
-        {/* Live Kitchen Order Stream */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          <Card className="p-6 bg-[var(--color-card-bg)] border border-[var(--color-border-val)]/60 rounded-2xl shadow-xs space-y-4 lg:col-span-2">
-            <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border-val)]/60">
-              <h3 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2">
-                <Notification size={18} className="text-flame-500" variant="Bold" /> Live Kitchen Orders (2 Active)
-              </h3>
-              <span className="text-xs font-bold text-flame-600 animate-pulse">● Auto Refresh Live</span>
+            <Card className="max-w-md mx-auto p-8 text-center border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl shadow-sm space-y-5">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg)] text-cream-600">
+                <ShoppingCart size={32} />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-[var(--color-text-primary)] font-[family-name:var(--font-display)]">
+                  Log In to View Your Cart
+                </h3>
+                <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
+                  We sync your cart items dynamically to your profile so you can place orders seamlessly across all your devices.
+                </p>
+              </div>
+              <Button className="w-full bg-flame-500 hover:bg-flame-600 text-white rounded-xl py-5" asChild>
+                <Link href="/login">Sign In & Continue</Link>
+              </Button>
+            </Card>
+          </motion.div>
+        ) : isLoading ? (
+          /* Loading View Skeletons */
+          <div className="grid gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-4">
+              {[1, 2].map((n) => (
+                <Card key={n} className="p-4 border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl flex gap-4 items-center animate-pulse">
+                  <div className="h-16 w-16 bg-[var(--color-surface)] rounded-xl" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-1/3 bg-[var(--color-surface)] rounded" />
+                    <div className="h-3 w-1/4 bg-[var(--color-surface)] rounded" />
+                  </div>
+                  <div className="h-4 w-16 bg-[var(--color-surface)] rounded" />
+                </Card>
+              ))}
             </div>
-
-            <div className="space-y-4">
-              <div className="p-4 bg-[var(--color-bg)]/50 border border-flame-200 rounded-2xl space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[var(--color-text-primary)] font-mono">#ORD-991201</span>
-                  <Badge className="bg-amber-100 text-amber-800 font-bold text-[10px]">PREPARING (12 mins remaining)</Badge>
-                </div>
-                <div className="text-xs space-y-1 text-[var(--color-text-primary)]">
-                  <p>• 2x Classic Cheeseburger (Extra Cheese)</p>
-                  <p>• 1x Hyderabadi Biryani</p>
-                </div>
-                <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border-val)]/40">
-                  <span className="text-xs font-bold text-flame-600">₹447.00 • Paid via Razorpay</span>
-                  <Button size="sm" className="bg-flame-500 hover:bg-flame-600 text-white rounded-xl text-xs font-bold">
-                    Mark Ready for Pickup
+            <div className="h-48 bg-[var(--color-card-bg)] border border-[var(--color-border-val)]/50 rounded-2xl animate-pulse" />
+          </div>
+        ) : !cart || cart.items.length === 0 ? (
+          /* Empty Cart View */
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <Card className="max-w-md mx-auto p-8 text-center border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl shadow-sm space-y-5">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-bg)] text-cream-400">
+                <ShoppingCart size={32} />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-[var(--color-text-primary)] font-[family-name:var(--font-display)]">
+                  Your Cart is Empty
+                </h3>
+                <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
+                  Looks like you haven&apos;t added any yummy bites to your cart yet. Head to our menu to discover our famous special recipes!
+                </p>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Button className="w-full bg-flame-500 hover:bg-flame-600 text-white rounded-xl py-5" asChild>
+                  <Link href="/menu">Explore Menu</Link>
+                </Button>
+                <Button variant="ghost" className="w-full text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] rounded-xl" asChild>
+                  <Link href="/" className="flex items-center justify-center gap-1.5">
+                    <ArrowLeft size={16} /> Back to Home
+                  </Link>
+                </Button>
+              </div>
+            </Card>
+          </motion.div>
+        ) : (
+          /* Cart Grid Content */
+          <div className="grid gap-8 lg:grid-cols-3 items-start">
+            {/* Left Items Column */}
+            <div className="lg:col-span-2 space-y-4">
+              <Card className="p-6 border-[var(--color-border-val)]/50 bg-[var(--color-card-bg)] rounded-2xl shadow-sm">
+                <div className="flex justify-between items-center pb-4 border-b border-[var(--color-border-val)]/60">
+                  <span className="text-sm font-semibold text-[var(--color-text-primary)]">
+                    Selected Dishes ({cartItemCount})
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50 gap-1.5 rounded-lg text-xs font-semibold px-2.5"
+                    onClick={handleClearCart}
+                    disabled={clearCartMutation.isPending}
+                  >
+                    <Trash size={14} variant="Bold" />
+                    Clear All
                   </Button>
                 </div>
-              </div>
 
-              <div className="p-4 bg-[var(--color-bg)]/50 border border-[var(--color-border-val)]/60 rounded-2xl space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[var(--color-text-primary)] font-mono">#ORD-991198</span>
-                  <Badge className="bg-blue-100 text-blue-800 font-bold text-[10px]">OUT FOR DELIVERY</Badge>
+                <div className="divide-y divide-border/60">
+                  {cart.items.map((item) => (
+                    <motion.div
+                      key={item._id}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <CartItem item={item} />
+                    </motion.div>
+                  ))}
                 </div>
-                <div className="text-xs space-y-1 text-[var(--color-text-primary)]">
-                  <p>• 1x Margherita Pizza</p>
-                  <p>• 2x Cold Soda</p>
-                </div>
-                <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border-val)]/40">
-                  <span className="text-xs font-bold text-emerald-600">₹320.00 • Paid via UPI</span>
-                  <Badge className="bg-emerald-50 text-emerald-700 font-bold text-[10px]">Rider Assigned (Rajesh K.)</Badge>
-                </div>
+              </Card>
+
+              {/* Continue Shopping CTA */}
+              <div className="text-left">
+                <Button variant="ghost" className="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] gap-1.5 rounded-xl px-0" asChild>
+                  <Link href="/menu">
+                    <ArrowLeft size={16} /> Continue Shopping
+                  </Link>
+                </Button>
               </div>
             </div>
-          </Card>
 
-          {/* Quick Stock Controls */}
-          <Card className="p-6 bg-[var(--color-card-bg)] border border-[var(--color-border-val)]/60 rounded-2xl shadow-xs space-y-4">
-            <h3 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2">
-              <Setting2 size={18} className="text-flame-500" variant="Bold" /> Quick Item Stock Toggles
-            </h3>
-            <div className="space-y-3 text-xs">
-              <div className="flex items-center justify-between p-3 bg-[var(--color-bg)] rounded-xl">
-                <span className="font-semibold text-[var(--color-text-primary)]">Classic Cheeseburger</span>
-                <span className="text-emerald-600 font-bold">IN STOCK</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-[var(--color-bg)] rounded-xl">
-                <span className="font-semibold text-[var(--color-text-primary)]">Hyderabadi Biryani</span>
-                <span className="text-emerald-600 font-bold">IN STOCK</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-[var(--color-bg)] rounded-xl">
-                <span className="font-semibold text-[var(--color-text-primary)]">Steamed Momos</span>
-                <span className="text-amber-600 font-bold">LOW STOCK</span>
-              </div>
+            {/* Right Summary Column */}
+            <div className="lg:col-span-1 sticky top-24">
+              <CartSummary cart={cart} />
             </div>
-          </Card>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
